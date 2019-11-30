@@ -1,0 +1,43 @@
+{
+  "name": "sketch-karas",
+  "version": "0.0.1",
+  "description": "sketch plugin",
+  "maintainers": [
+    {
+      "name": "army8735",
+      "email": "army8735@qq.com"
+    }
+  ],
+  "engines": {
+    "sketch": ">=60.0"
+  },
+  "skpm": {
+    "name": "sketch-karas",
+    "manifest": "src/manifest.json",
+    "main": "sketch-karas.sketchplugin",
+    "assets": [
+      "assets/**/*"
+    ]
+  },
+  "scripts": {
+    "build": "skpm-build",
+    "watch": "skpm-build --watch",
+    "start": "skpm-build --watch --run",
+    "postinstall": "npm run build && skpm-link",
+    "dev": "skpm-build --watch & skpm log -f",
+    "log": "skpm log",
+    "logs": "skpm log -f"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/karasjs/sketch-karas.git"
+  },
+  "dependencies": {
+    "sketch-module-web-view": "^3.4.1",
+    "skpm": "^1.3.1"
+  },
+  "devDependencies": {
+    "@skpm/builder": "^0.7.4",
+    "webstorm-disable-index": "^1.2.0"
+  }
+}
