@@ -1,0 +1,24 @@
+{
+  "compatibleVersion": 60,
+  "bundleVersion": 1,
+  "suppliesData": true,
+  "commands": [
+    {
+      "name": "my-command",
+      "identifier": "my-plugin.my-command-identifier",
+      "script": "./my-command.js",
+      "handlers": {
+        "run": "onRun",
+        "actions": {
+          "Shutdown": "onShutdown"
+        }
+      }
+    }
+  ],
+  "menu": {
+    "title": "my-plugin",
+    "items": [
+      "my-plugin.my-command-identifier"
+    ]
+  }
+}

@@ -19,3 +19,6 @@ reports/
 .travis.yml
 selenium-debug.log
 src/
+sketch-karas.sketchplugin/
+sketch-assets/
+resources/
