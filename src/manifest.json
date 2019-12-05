@@ -1,24 +1,26 @@
 {
-  "compatibleVersion": 60,
+  "compatibleVersion": 57,
   "bundleVersion": 1,
-  "suppliesData": true,
+  "icon": "icon.png",
   "commands": [
     {
-      "name": "my-command",
-      "identifier": "my-plugin.my-command-identifier",
-      "script": "./my-command.js",
+      "name": "animation",
+      "identifier": "animation",
+      "script": "./animation.js",
       "handlers": {
         "run": "onRun",
         "actions": {
-          "Shutdown": "onShutdown"
+          "Shutdown": "onShutdown",
+          "SelectionChanged.begin": "onSelectionChangedBegin",
+          "SelectionChanged.finish": "onSelectionChangedFinish"
         }
       }
     }
   ],
   "menu": {
-    "title": "my-plugin",
+    "title": "sketch-karas",
     "items": [
-      "my-plugin.my-command-identifier"
+      "animation"
     ]
   }
 }

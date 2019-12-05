@@ -5,7 +5,7 @@ module.exports = function (config, entry) {
   config.module.rules.push({
     test: /\.(html)$/,
     use: [{
-        loader: "@skpm/extract-loader",
+        loader: "army8735-extract",
       },
       {
         loader: "html-loader",
@@ -22,7 +22,7 @@ module.exports = function (config, entry) {
   config.module.rules.push({
     test: /\.(css)$/,
     use: [{
-        loader: "@skpm/extract-loader",
+        loader: "army8735-extract",
       },
       {
         loader: "css-loader",
@@ -32,7 +32,7 @@ module.exports = function (config, entry) {
   config.module.rules.push({
     test: /\.(less)$/,
     use: [{
-      loader: "@skpm/extract-loader",
+      loader: "army8735-extract",
     },
       {
         loader: "less-loader",
