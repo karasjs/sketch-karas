@@ -86,9 +86,9 @@ export function onSelectionChangedFinish(context) {
       let json;
       if(newSelection.length === 1) {
         let layer = newSelection[0];
-        layer = sketch.fromNative(layer);
-        console.log(JSON.stringify(layer));
-        let customLayer = new CustomLayer(layer, util.getTop(layer));
+        // layer = sketch.fromNative(layer);
+        // console.log(JSON.stringify(layer));
+        let customLayer = new CustomLayer(layer);
       }
       else {
         newSelection = null;

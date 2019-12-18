@@ -4,7 +4,7 @@
   "icon": "icon.png",
   "commands": [
     {
-      "name": "animation",
+      "name": "打开动画窗口",
       "identifier": "animation",
       "script": "./animation.js",
       "handlers": {
@@ -15,12 +15,19 @@
           "SelectionChanged.finish": "onSelectionChangedFinish"
         }
       }
+    },
+    {
+      "name": "添加元素到库",
+      "identifier": "add2Library",
+      "script": "./add2Library.js",
+      "handler": "add2Library"
     }
   ],
   "menu": {
     "title": "sketch-karas",
     "items": [
-      "animation"
+      "animation",
+      "add2Library"
     ]
   }
 }
