@@ -21,13 +21,20 @@
       "identifier": "add2Library",
       "script": "./add2Library.js",
       "handler": "add2Library"
+    },
+    {
+      "name": "清空库",
+      "identifier": "clearLibrary",
+      "script": "./clearLibrary.js",
+      "handler": "clearLibrary"
     }
   ],
   "menu": {
     "title": "sketch-karas",
     "items": [
       "animation",
-      "add2Library"
+      "add2Library",
+      "clearLibrary"
     ]
   }
 }
