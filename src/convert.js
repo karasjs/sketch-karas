@@ -69,7 +69,7 @@ export default function(layer) {
   // console.log(JSON.stringify(json));
   let data = parseNormal(json);
   if(data.type === type.SHAPE_PATH) {
-    Object.assign(data, parseShapePath(json));
+    parseShapePath(data, json);
   }
   return data;
 }

@@ -10,7 +10,7 @@ export function clearLibrary() {
     if(err) {
       return;
     }
-    if(value === 'Y') {
+    if(value === 'Y' || value === 'y') {
       Settings.setDocumentSettingForKey(document, 'library', null);
       UI.message('Library cleared');
     }

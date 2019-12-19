@@ -18,19 +18,21 @@ window.setRandomNumber = (randomNumber) => {
 let app = new Vue({
   el: '#app',
   data: {
-    enabled: true, // 用户主动控制开关启用编辑器
-    disabled: true, // 是否选中单个layer开关启用编辑器
     message: 'Hello Vue!'
   }
 });
 
-window.changeState = (enabled) => {
-  app.enabled = enabled;
-};
+// window.changeState = (enabled) => {
+//   app.enabled = enabled;
+// };
+//
+// window.changeSelection = (item) => {
+//   if(item) {
+//     app.enabled = true;
+//   }
+//   else {}
+// };
 
-window.changeSelection = (item) => {
-  if(item) {
-    app.enabled = true;
-  }
-  else {}
+window.g_updateLibrary = json => {
+  document.getElementById('answer').innerHTML = JSON.stringify(json);
 };

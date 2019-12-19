@@ -8,7 +8,7 @@ export function add2Library() {
   let document = Document.getSelectedDocument();
   let selection = document.selectedLayers;
   if(!selection || selection.isEmpty) {
-    UI.alert('At lease one layer must be selected!');
+    UI.alert('warn', 'At lease one layer must be selected!');
     return;
   }
   let json = Settings.documentSettingForKey(document, 'library') || {};
@@ -22,7 +22,7 @@ export function add2Library() {
   if(existingWebview) {
     let webContents = existingWebview.webContents;
     webContents
-      .executeJavaScript(`updateLibrary(${JSON.stringify(json)})`)
+      .executeJavaScript(`g_updateLibrary(${JSON.stringify(json)})`)
       .catch(console.error);
   }
 }

@@ -11,16 +11,22 @@ class Library {
   add(layer) {
     let item = LibraryItem.fromNative(layer);
     if(item.isPage) {
-      UI.alert(`Can not add a page(${layer.id}) to library!`);
+      UI.alert('warn', `Can not add a page(${layer.name}/${layer.id}) to library!`);
       return;
     }
     if(item.isArtBoard) {
-      UI.alert(`Can not add an artBoard(${layer.id}) to library!`);
+      UI.alert('warn', `Can not add an artBoard(${layer.name}/${layer.id}) to library!`);
       return;
     }
     if(item.isHidden) {
-      UI.alert(`Can not add a hidden layer(${layer.id}) to library!`);
+      UI.alert('warn', `Can not add a hidden layer(${layer.name}/${layer.id}) to library!`);
       return;
+    }
+    for(let i = 0; i < this.list.length; i++) {
+      if(item.id === this.list[i].id) {
+        UI.alert('warn', `Can not add duplicate layer(${layer.name}/${layer.id}) to library!`);
+        return;
+      }
     }
     this.list.push(item);
   }
