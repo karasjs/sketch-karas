@@ -1,7 +1,9 @@
 import BrowserWindow from 'sketch-module-web-view';
 import { getWebview } from 'sketch-module-web-view/remote';
+import { Document } from 'sketch/dom';
 import UI from 'sketch/ui';
 import Settings from 'sketch/settings';
+import Library from "./Library";
 
 let webviewIdentifier = 'sketch-karas.webview';
 
@@ -16,6 +18,9 @@ export default function() {
     y,
     width,
     height,
+    minWidth: 800,
+    minHeight: 600,
+    backgroundColor: '#1d1e1f',
     show: true,
   };
 
@@ -40,19 +45,41 @@ export default function() {
 
   let webContents = browserWindow.webContents;
 
-  // print a message when the page loads
+
   webContents.on('did-finish-load', () => {
-    UI.message('UI loaded!')
+    UI.message('UI loaded!');
+    // console.log('did-finish-load');
   });
 
-  // add a handler for a call from web content's javascript
-  // webContents.on('nativeLog', s => {
-  //   UI.message(s);
-  //   console.log(s);
+  webContents.on('did-frame-finish-load', () => {
+    // console.log('did-frame-finish-load');
+  });
+
+  // print a message when the page loads
+  // webContents.on('dom-ready', () => {
+  //   console.log('dom-ready');
+  //   UI.message('UI loaded!');
+  //   let json = Settings.documentSettingForKey(document, 'library') || {};
+  //   let library = Library.parse(json);
+  //   json = library.toJSON();
   //   webContents
-  //     .executeJavaScript(`setRandomNumber(${Math.random()})`)
+  //     .executeJavaScript(`g_updateLibrary(${JSON.stringify(json)})`)
   //     .catch(console.error);
   // });
+
+  // add a handler for a call from web content's javascript
+  webContents.on('nativeLog', s => {
+    UI.message(s);
+    if (s === 'dom-ready') {
+      let document = Document.getSelectedDocument();
+      let json = Settings.documentSettingForKey(document, 'library') || {};
+      let library = Library.parse(json);
+      json = library.toJSON();
+      webContents
+        .executeJavaScript(`g_updateLibrary(${JSON.stringify(json)})`)
+        .catch(console.error);j
+    }
+  });
 
   browserWindow.loadURL(require('../resources/index.html'));
 }

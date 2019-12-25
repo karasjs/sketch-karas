@@ -23,6 +23,7 @@ function parseNormal(json) {
 }
 
 function parseShapePath(data, json) {
+  data.tagName = '$polygon';
   let { points, style: { fills, borders } } = json;
   // 点和控制点
   let pts = [];
