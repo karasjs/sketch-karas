@@ -27,16 +27,9 @@ module.exports = function (config, entry) {
       {
         loader: "css-loader",
       },
+      {
+        loader: "less-loader",
+      }
     ]
   });
-  // config.module.rules.push({
-  //   test: /\.(less)$/,
-  //   use: [{
-  //     loader: "army8735-extract",
-  //   },
-  //     {
-  //       loader: "less-loader",
-  //     },
-  //   ]
-  // });
 };

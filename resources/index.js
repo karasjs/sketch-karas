@@ -1,9 +1,13 @@
 import React from 'react';
 import ReactDom from 'react-dom';
+import { Provider } from 'mobx-react';
 
-import Library from './Library';
-import Tool from './Tool';
-import Timeline from './Timeline';
+import store from './store';
+
+import Library from './component/Library';
+import Tool from './component/Tool';
+import Timeline from './component/Timeline';
+import Confirm from './component/Confirm';
 
 // disable the context menu (eg. the right click menu) to have a more native feel
 // document.addEventListener('contextmenu', (e) => {
@@ -13,20 +17,26 @@ import Timeline from './Timeline';
 class App extends React.Component {
   render() {
     return <>
-      <Tool ref={el => this.tool = el}/>
+      <Tool/>
       <div class="container">
         <div class="preview"/>
-        <Timeline ref={el => this.timeline = el}/>
+        <Timeline/>
       </div>
-      <Library ref={el => this.library = el}/>
+      <Library/>
+      <Confirm/>
     </>;
   }
 }
 
-let app = ReactDom.render(<App/>, document.getElementById('app'));
+let app = ReactDom.render(
+  <Provider {...store}>
+    <App/>
+  </Provider>,
+  document.getElementById('app')
+);
 
 window.postMessage('nativeLog', 'dom-ready');
 
 window.g_updateLibrary = json => {
-  app.library.update(json);
+  store.library.update(json.list);
 };

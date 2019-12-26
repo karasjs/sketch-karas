@@ -1,15 +1,15 @@
 import React from 'react';
 import karas from 'karas';
+import { observer, inject } from 'mobx-react';
 
-import type from '../src/type';
+import type from '../../src/type';
 
+@inject('confirm')
 class LibraryItem extends React.Component {
   componentDidMount() {
-    console.log(this.data);
     if(this.isMeta) {
-      let { points, style, style: { width, height } } = this.data;
+      let { points, style, style: { width, height } } = this.props.data;
       let scale = Math.min(16 / width, 16 / height);
-      console.log(width, height, scale, width * scale, height * scale);
       karas.render(
         karas.createVd('svg', [
           ['width', 16],
@@ -35,11 +35,22 @@ class LibraryItem extends React.Component {
     }
   }
 
+  edit() {
+    window.prompt('f');
+  }
+
+  del() {
+    console.log(1);
+    this.props.confirm.visible = true;
+  }
+
   render() {
-    const { name } = this.data;
-    return <div class="library-item">
+    const { name, id } = this.props.data;
+    return <div class="library-item" title={id}>
       <div class="icon" ref={el => this.icon = el}/>
       <div class="name">{name}</div>
+      <div class="edit" onClick={() => this.edit()}/>
+      <div class="del" onClick={() => this.del()}/>
     </div>;
   }
 
