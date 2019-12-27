@@ -9,8 +9,12 @@ class Library extends React.Component {
   render() {
     const { list } = this.props.library;
     return <div class="library">
+      <h1>库</h1>
       {
-        list.map(item => <LibraryItem key={item.id} data={item}/>)
+        list.map(item => <LibraryItem
+          key={item.id}
+          data={item}
+        />)
       }
     </div>;
   }

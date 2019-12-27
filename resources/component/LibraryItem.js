@@ -3,8 +3,25 @@ import karas from 'karas';
 import { observer, inject } from 'mobx-react';
 
 import type from '../../src/type';
+import put from './put';
+
+let timeout;
+
+document.body.addEventListener('mousemove', () => {
+  if(timeout) {
+    clearTimeout(timeout);
+    timeout = null;
+  }
+  if(put.isDown) {
+    put.isMove = true;
+  }
+  if(put.isMove) {
+    document.body.classList.add('put');
+  }
+});
 
 @inject('confirm')
+@observer
 class LibraryItem extends React.Component {
   componentDidMount() {
     if(this.isMeta) {
@@ -20,7 +37,7 @@ class LibraryItem extends React.Component {
             ['style', {
               position: 'absolute',
               left: (16 - width * scale) * 0.5,
-              top: ( 16 - height * scale) * 0.5,
+              top: (16 - height * scale) * 0.5,
               margin: '0 auto',
               width: width * scale,
               height: height * scale,
@@ -36,19 +53,26 @@ class LibraryItem extends React.Component {
   }
 
   edit() {
-    window.prompt('f');
   }
 
   del() {
-    console.log(1);
-    this.props.confirm.visible = true;
+  }
+
+  down(e) {
+    e.preventDefault();
+    put.isDown = true;
+    put.data = this.props.data;
+    timeout = setTimeout(() => {
+      put.isMove = true;
+      document.body.classList.add('put');
+    }, 100);
   }
 
   render() {
     const { name, id } = this.props.data;
     return <div class="library-item" title={id}>
-      <div class="icon" ref={el => this.icon = el}/>
-      <div class="name">{name}</div>
+      <div class="icon" ref={el => this.icon = el} onMouseDown={e => this.down(e)}/>
+      <div class="name" onMouseDown={e => this.down(e)}>{name}</div>
       <div class="edit" onClick={() => this.edit()}/>
       <div class="del" onClick={() => this.del()}/>
     </div>;

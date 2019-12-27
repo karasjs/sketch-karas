@@ -8,10 +8,12 @@ import Library from './component/Library';
 import Tool from './component/Tool';
 import Timeline from './component/Timeline';
 import Confirm from './component/Confirm';
+import Preview from './component/Preview';
+import Global from './component/Global';
 
 // disable the context menu (eg. the right click menu) to have a more native feel
-// document.addEventListener('contextmenu', (e) => {
-//   e.preventDefault()
+// document.addEventListener('contextmenu', e => {
+//   e.preventDefault();
 // });
 
 class App extends React.Component {
@@ -19,16 +21,19 @@ class App extends React.Component {
     return <>
       <Tool/>
       <div class="container">
-        <div class="preview"/>
+        <Preview/>
         <Timeline/>
       </div>
-      <Library/>
+      <div class="side">
+        <Global/>
+        <Library/>
+      </div>
       <Confirm/>
     </>;
   }
 }
 
-let app = ReactDom.render(
+ReactDom.render(
   <Provider {...store}>
     <App/>
   </Provider>,
@@ -36,6 +41,11 @@ let app = ReactDom.render(
 );
 
 window.postMessage('nativeLog', 'dom-ready');
+
+window.g_init = json => {
+  console.log(json);
+  store.library.update(json.library.list);
+};
 
 window.g_updateLibrary = json => {
   store.library.update(json.list);

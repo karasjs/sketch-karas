@@ -3,7 +3,7 @@ import { getWebview } from 'sketch-module-web-view/remote';
 import { Document } from 'sketch/dom';
 import UI from 'sketch/ui';
 import Settings from 'sketch/settings';
-import Library from "./Library";
+import Library from './Library';
 
 let webviewIdentifier = 'sketch-karas.webview';
 
@@ -45,7 +45,6 @@ export default function() {
 
   let webContents = browserWindow.webContents;
 
-
   webContents.on('did-finish-load', () => {
     UI.message('UI loaded!');
     // console.log('did-finish-load');
@@ -57,7 +56,6 @@ export default function() {
 
   // print a message when the page loads
   // webContents.on('dom-ready', () => {
-  //   console.log('dom-ready');
   //   UI.message('UI loaded!');
   //   let json = Settings.documentSettingForKey(document, 'library') || {};
   //   let library = Library.parse(json);
@@ -69,15 +67,18 @@ export default function() {
 
   // add a handler for a call from web content's javascript
   webContents.on('nativeLog', s => {
-    UI.message(s);
-    if (s === 'dom-ready') {
+    if(s === 'dom-ready') {
       let document = Document.getSelectedDocument();
-      let json = Settings.documentSettingForKey(document, 'library') || {};
-      let library = Library.parse(json);
-      json = library.toJSON();
+      let library = Settings.documentSettingForKey(document, 'library') || {};
+      let timeline = Settings.documentSettingForKey(document, 'timeline') || {};
+      let layer = Settings.documentSettingForKey(document, 'layer') || {};
       webContents
-        .executeJavaScript(`g_updateLibrary(${JSON.stringify(json)})`)
-        .catch(console.error);j
+        .executeJavaScript(`g_init(${JSON.stringify({
+          library,
+          timeline,
+          layer,
+        })})`)
+        .catch(console.error);
     }
   });
 
@@ -88,48 +89,7 @@ export default function() {
 // we need to close the webview if it's open
 export function onShutdown() {
   let existingWebview = getWebview(webviewIdentifier);
-  if (existingWebview) {
+  if(existingWebview) {
     existingWebview.close();
   }
-}
-
-let timeout;
-
-export function onSelectionChangedBegin() {
-  // let existingWebview = getWebview(webviewIdentifier);
-  // if(existingWebview) {
-  //   let webContents = existingWebview.webContents;
-  //   if(timeout) {
-  //     clearTimeout(timeout);
-  //   }
-  //   webContents
-  //     .executeJavaScript(`changeDisabled(true)`)
-  //     .catch(console.error);
-  // }
-}
-
-export function onSelectionChangedFinish(context) {
-  // let existingWebview = getWebview(webviewIdentifier);
-  // if(existingWebview) {
-  //   let webContents = existingWebview.webContents;
-  //   if(timeout) {
-  //     clearTimeout(timeout);
-  //   }
-  //   timeout = setTimeout(() => {
-  //     let newSelection = context.actionContext.newSelection;
-  //     let json;
-  //     if(newSelection.length === 1) {
-  //       let layer = newSelection[0];
-  //       // layer = sketch.fromNative(layer);
-  //       // console.log(JSON.stringify(layer));
-  //       // let customLayer = new CustomLayer(layer);
-  //     }
-  //     else {
-  //       newSelection = null;
-  //     }
-  //     webContents
-  //       .executeJavaScript(`changeDisabled(true)`)
-  //       .catch(console.error);
-  //   }, 200);
-  // }
 }
