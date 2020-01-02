@@ -4,7 +4,8 @@ module.exports = function (config, entry) {
   };
   config.module.rules.push({
     test: /\.(html)$/,
-    use: [{
+    use: [
+      {
         loader: "army8735-extract",
       },
       {
@@ -21,7 +22,8 @@ module.exports = function (config, entry) {
   });
   config.module.rules.push({
     test: /\.(css)$/,
-    use: [{
+    use: [
+      {
         loader: "army8735-extract",
       },
       {
@@ -29,6 +31,17 @@ module.exports = function (config, entry) {
       },
       {
         loader: "less-loader",
+      }
+    ]
+  });
+  config.module.rules.push({
+    test: /\.(csx)$/,
+    use: [
+      {
+        loader: "babel-loader",
+      },
+      {
+        loader: "karas-loader",
       }
     ]
   });

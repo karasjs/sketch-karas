@@ -12,9 +12,9 @@ function parseNormal(json) {
   ['type', 'id', 'name', 'hidden'].forEach(k => {
     res[k] = json[k];
   });
-  ['x', 'y'].forEach(k => {
-    res.style[k === 'x' ? 'left' : 'top'] = json.frame[k];
-  });
+  // ['x', 'y'].forEach(k => {
+  //   res.style[k === 'x' ? 'left' : 'top'] = json.frame[k];
+  // });
   ['width', 'height'].forEach(k => {
     res.style[k] = json.frame[k];
   });

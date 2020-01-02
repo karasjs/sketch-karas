@@ -1,7 +1,8 @@
 import React from 'react';
 import { observer, inject } from 'mobx-react';
 
-import Layer from './Layer';
+import LayerItem from './LayerItem';
+import layer from '../store/layer';
 
 function formatTime(t) {
   let hour = 0;
@@ -40,12 +41,18 @@ function formatTime(t) {
 }
 
 @inject('timeline')
+@inject('layer')
 @observer
 class Timeline extends React.Component {
   fps() {}
 
+  del() {
+    layer.delActive();
+  }
+
   render() {
     const { currentTime, totalFrame, fps } = this.props.timeline;
+    const { list } = this.props.layer;
     return <div class="timeline">
       <div class="data">
         <div class="num">
@@ -55,10 +62,14 @@ class Timeline extends React.Component {
           <span> / </span>
           <span onClick={() => this.fps()}>{fps}fps</span>
         </div>
-        <Layer/>
+        <div class="layer">
+          {
+            list.map(item => <LayerItem data={item}/>)
+          }
+        </div>
         <div class="fn">
           <span class="new"/>
-          <span class="del"/>
+          <span class="del" onClick={() => this.del()}/>
         </div>
       </div>
       <div class="panel">

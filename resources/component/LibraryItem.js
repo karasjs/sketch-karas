@@ -1,22 +1,40 @@
 import React from 'react';
-import karas from 'karas';
 import { observer, inject } from 'mobx-react';
+import lodash from 'lodash';
 
 import type from '../../src/type';
-import put from './put';
+import drag from './drag';
+import layer from '../store/layer';
+import preview from './preview.csx';
 
 let timeout;
 
-document.body.addEventListener('mousemove', () => {
+document.body.addEventListener('mousemove', e => {
   if(timeout) {
     clearTimeout(timeout);
     timeout = null;
   }
-  if(put.isDown) {
-    put.isMove = true;
+  if(drag.isDown) {
+    drag.isMove = true;
   }
-  if(put.isMove) {
-    document.body.classList.add('put');
+  if(drag.isMove) {
+    document.body.classList.add('drag');
+    if(drag.isEnter && drag.data) {
+      drag.data.style.left = e.offsetX;
+      drag.data.style.top = e.offsetY;
+    }
+  }
+});
+document.body.addEventListener('mouseup', e => {
+  if(drag.isMove) {
+    drag.isDown = false;
+    drag.isMove = false;
+    document.body.classList.remove('drag');
+    if(drag.isEnter && drag.data) {
+      layer.add(drag.data);
+    }
+    drag.isEnter = false;
+    drag.data = null;
   }
 });
 
@@ -25,30 +43,7 @@ document.body.addEventListener('mousemove', () => {
 class LibraryItem extends React.Component {
   componentDidMount() {
     if(this.isMeta) {
-      let { points, style, style: { width, height } } = this.props.data;
-      let scale = Math.min(16 / width, 16 / height);
-      karas.render(
-        karas.createVd('svg', [
-          ['width', 16],
-          ['height', 16],
-        ], [
-          karas.createGm('$polygon', [
-            ['points', points],
-            ['style', {
-              position: 'absolute',
-              left: (16 - width * scale) * 0.5,
-              top: (16 - height * scale) * 0.5,
-              margin: '0 auto',
-              width: width * scale,
-              height: height * scale,
-              fill: style.fill,
-              stroke: style.stroke,
-              strokeWidth: style.strokeWidth * scale,
-            }],
-          ]),
-        ]),
-        this.icon
-      );
+      preview.geom(this.props.data, this.icon);
     }
   }
 
@@ -60,11 +55,11 @@ class LibraryItem extends React.Component {
 
   down(e) {
     e.preventDefault();
-    put.isDown = true;
-    put.data = this.props.data;
+    drag.isDown = true;
+    drag.data = lodash.cloneDeep(this.props.data);
     timeout = setTimeout(() => {
-      put.isMove = true;
-      document.body.classList.add('put');
+      drag.isMove = true;
+      document.body.classList.add('drag');
     }, 100);
   }
 

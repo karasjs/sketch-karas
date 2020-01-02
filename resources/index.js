@@ -10,6 +10,7 @@ import Timeline from './component/Timeline';
 import Confirm from './component/Confirm';
 import Preview from './component/Preview';
 import Global from './component/Global';
+import message from './message';
 
 // disable the context menu (eg. the right click menu) to have a more native feel
 // document.addEventListener('contextmenu', e => {
@@ -40,13 +41,14 @@ ReactDom.render(
   document.getElementById('app')
 );
 
-window.postMessage('nativeLog', 'dom-ready');
-
 window.g_init = json => {
-  console.log(json);
+  console.log('g_init', json);
   store.library.update(json.library.list);
+  store.layer.update(json.layer.list);
 };
 
 window.g_updateLibrary = json => {
   store.library.update(json.list);
 };
+
+message.domReady();

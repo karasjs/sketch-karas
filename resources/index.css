@@ -106,7 +106,7 @@ input{
   line-height:normal;
 }
 
-body.put{
+body.drag{
   cursor:wait;
 }
 
@@ -191,7 +191,52 @@ body.put{
 
       .layer{
         flex:1;
-        margin-top:20px;
+        margin-top:12px;
+
+        .layer-item{
+          display:flex;
+          align-items:center;
+          height:18px;
+          background:#2e2f30;
+          border:1px solid #1d1e1f;
+          border-bottom-color:#2e2f30;
+
+          &.active{
+            border-color:#a33;
+          }
+
+          .lock{
+            width:18px;
+            height:18px;
+            background:url(img/unlock.png) no-repeat center;
+            background-size:11px 13px;
+
+            &.ing{
+              background:url(img/lock.png) no-repeat center;
+              background-size:11px 13px;
+            }
+          }
+
+          .name{
+            width:60px;
+            font-size:10px;
+            color:#A1A1A2;
+            overflow:hidden;
+            text-overflow:ellipsis;
+          }
+
+          .spread{
+            width:18px;
+            height:18px;
+            background:url(img/spread.png) no-repeat center;
+            background-size:8px 11px;
+            transition:transform 0.2s;
+
+            &.ing{
+              transform:rotate(90deg);
+            }
+          }
+        }
       }
 
       .fn{

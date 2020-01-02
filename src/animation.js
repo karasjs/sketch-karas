@@ -8,10 +8,11 @@ import Library from './Library';
 let webviewIdentifier = 'sketch-karas.webview';
 
 export default function() {
-  let x = Settings.settingForKey('x') || 0;
-  let y = Settings.settingForKey('y') || 0;
-  let width = Settings.settingForKey('width') || 800;
-  let height = Settings.settingForKey('height') || 600;
+  let document = Document.getSelectedDocument();
+  let x = Settings.documentSettingForKey(document, 'x') || 0;
+  let y = Settings.documentSettingForKey(document, 'y') || 0;
+  let width = Settings.documentSettingForKey(document, 'width') || 800;
+  let height = Settings.documentSettingForKey(document, 'height') || 600;
   let options = {
     identifier: webviewIdentifier,
     x,
@@ -28,14 +29,14 @@ export default function() {
 
   browserWindow.on('resize', () => {
     [width, height] = browserWindow.getSize();
-    Settings.setSettingForKey('width', width);
-    Settings.setSettingForKey('height', height);
+    Settings.setDocumentSettingForKey(document, 'width', width);
+    Settings.setDocumentSettingForKey(document, 'height', height);
   });
 
   browserWindow.on('move', () => {
     ({ x, y } = browserWindow.getBounds());
-    Settings.setSettingForKey('x', x);
-    Settings.setSettingForKey('y', y);
+    Settings.setDocumentSettingForKey(document, 'x', x);
+    Settings.setDocumentSettingForKey(document, 'y', y);
   });
 
   // only show the window when the page has loaded to avoid a white flash
@@ -66,19 +67,27 @@ export default function() {
   // });
 
   // add a handler for a call from web content's javascript
-  webContents.on('nativeLog', s => {
-    if(s === 'dom-ready') {
-      let document = Document.getSelectedDocument();
+  webContents.on('nativeLog', json => {
+    let { key, value } = json;
+    console.log(json);
+    if(key === 'domReady') {
       let library = Settings.documentSettingForKey(document, 'library') || {};
       let timeline = Settings.documentSettingForKey(document, 'timeline') || {};
       let layer = Settings.documentSettingForKey(document, 'layer') || {};
+      let global = Settings.documentSettingForKey(document, 'global') || {};
       webContents
         .executeJavaScript(`g_init(${JSON.stringify({
           library,
           timeline,
           layer,
+          global,
         })})`)
         .catch(console.error);
+    }
+    else if(key === 'updateLayer') {
+      Settings.setDocumentSettingForKey(document, 'layer', {
+        list: value,
+      });
     }
   });
 

@@ -1,23 +1,24 @@
 import React from 'react';
 import { observer, inject } from 'mobx-react';
 
-import put from './put';
+import StageItem from './StageItem';
+import drag from './drag';
 
 @inject('layer')
 @inject('global')
 @observer
 class Stage extends React.Component {
   enter() {
-    put.isEnter = true;
+    drag.isEnter = true;
   }
   leave() {
-    put.isEnter = false;
+    drag.isEnter = false;
   }
 
   render() {
     const { width, height } = this.props.global;
+    const { list } = this.props.layer;
     return <div
-      id="stage"
       class="stage"
       onMouseEnter={() => this.enter()}
       onMouseLeave={() => this.leave()}
@@ -25,7 +26,9 @@ class Stage extends React.Component {
         width,
         height,
       }}>
-      1
+      {
+        list.map(item => <StageItem data={item}/>)
+      }
     </div>;
   }
 }
