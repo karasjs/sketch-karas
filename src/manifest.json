@@ -10,9 +10,7 @@
       "handlers": {
         "run": "onRun",
         "actions": {
-          "Shutdown": "onShutdown",
-          "SelectionChanged.begin": "onSelectionChangedBegin",
-          "SelectionChanged.finish": "onSelectionChangedFinish"
+          "Shutdown": "onShutdown"
         }
       }
     },

@@ -24,5 +24,6 @@ export function add2Library() {
     webContents
       .executeJavaScript(`g_updateLibrary(${JSON.stringify(json)})`)
       .catch(console.error);
+    UI.message('Added to library.');
   }
 }

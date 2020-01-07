@@ -8,7 +8,6 @@ function formatTime(t) {
   let hour = 0;
   let minute = 0;
   let second = 0;
-  let ms = 0;
   if(t >= 360000) {
     hour = Math.floor(t / 360000);
     t -= hour * 360000;
@@ -21,7 +20,7 @@ function formatTime(t) {
     second = Math.floor(t / 1000);
     t -= second * 1000;
   }
-  ms = t;
+  let ms = t;
   minute = String(minute);
   second = String(second);
   ms = String(ms);

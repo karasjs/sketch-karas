@@ -5,6 +5,8 @@ import lodash from 'lodash';
 import type from '../../src/type';
 import drag from './drag';
 import layer from '../store/layer';
+import global from '../store/global';
+import library from '../store/library';
 import preview from './preview.csx';
 
 let timeout;
@@ -20,8 +22,10 @@ document.body.addEventListener('mousemove', e => {
   if(drag.isMove) {
     document.body.classList.add('drag');
     if(drag.isEnter && drag.data) {
-      drag.data.style.left = e.offsetX;
-      drag.data.style.top = e.offsetY;
+      drag.data.style.width = (drag.data.originWidth / global.width) * 100 + '%';
+      drag.data.style.height = (drag.data.originHeight / global.height) * 100 + '%';
+      drag.data.style.left = (e.offsetX / global.width) * 100 + '%';
+      drag.data.style.top = (e.offsetY / global.height) * 100 + '%';
     }
   }
 });
@@ -47,16 +51,24 @@ class LibraryItem extends React.Component {
     }
   }
 
+  componentWillUnmount() {
+    this.icon.innerHTML = '';
+  }
+
   edit() {
   }
 
   del() {
+    const { id } = this.props.data;
+    library.del(id);
   }
 
   down(e) {
     e.preventDefault();
     drag.isDown = true;
     drag.data = lodash.cloneDeep(this.props.data);
+    drag.data.originWidth = drag.data.style.width;
+    drag.data.originHeight = drag.data.style.height;
     timeout = setTimeout(() => {
       drag.isMove = true;
       document.body.classList.add('drag');

@@ -9,5 +9,11 @@ export default {
       key: 'updateLayer',
       value: v,
     });
-  }
+  },
+  updateLibrary(v) {
+    window.postMessage('nativeLog', {
+      key: 'updateLibrary',
+      value: v,
+    });
+    },
 };

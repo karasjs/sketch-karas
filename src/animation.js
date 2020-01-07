@@ -89,6 +89,11 @@ export default function() {
         list: value,
       });
     }
+    else if(key === 'updateLibrary') {
+      Settings.setDocumentSettingForKey(document, 'library', {
+        list: value,
+      });
+    }
   });
 
   browserWindow.loadURL(require('../resources/index.html'));
