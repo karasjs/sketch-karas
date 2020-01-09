@@ -47,7 +47,7 @@ document.body.addEventListener('mouseup', e => {
 class LibraryItem extends React.Component {
   componentDidMount() {
     if(this.isMeta) {
-      preview.geom(this.props.data, this.icon);
+      preview.icon(this.props.data, this.icon);
     }
   }
 

@@ -1,7 +1,10 @@
 import karas from 'karas';
 
+import type from '../../src/type';
+import global from '../store/global';
+
 export default {
-  geom(data, el) {
+  icon(data, el) {
     let { points, style, style: { width, height } } = data;
     let scale = Math.min(16 / width, 16 / height);
     return karas.render(
@@ -20,6 +23,27 @@ export default {
             strokeWidth: style.strokeWidth * scale,
           }}
         />
+      </svg>,
+      el
+    );
+  },
+  init(list, el) {
+    let children = list.map(item => {
+      console.log(item);
+      let { points, style } = item;
+      if(item.type === type.SHAPE_PATH) {
+        return <$polygon
+          points={points}
+          style={{
+            ...style,
+            position: 'absolute',
+          }}
+        />;
+      }
+    });
+    return karas.render(
+      <svg width={global.width} height={global.height}>
+        {children}
       </svg>,
       el
     );
