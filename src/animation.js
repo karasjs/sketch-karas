@@ -3,7 +3,6 @@ import { getWebview } from 'sketch-module-web-view/remote';
 import { Document } from 'sketch/dom';
 import UI from 'sketch/ui';
 import Settings from 'sketch/settings';
-import Library from './Library';
 
 let webviewIdentifier = 'sketch-karas.webview';
 

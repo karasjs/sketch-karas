@@ -1,11 +1,11 @@
 import React from 'react';
 import { observer, inject } from 'mobx-react';
 import lodash from 'lodash';
+import uuidv4 from 'uuid/v4';
 
 import type from '../../src/type';
 import drag from './drag';
 import layer from '../store/layer';
-import global from '../store/global';
 import library from '../store/library';
 import preview from './preview.csx';
 
@@ -22,10 +22,8 @@ document.body.addEventListener('mousemove', e => {
   if(drag.isMove) {
     document.body.classList.add('drag');
     if(drag.isEnter && drag.data) {
-      drag.data.style.width = (drag.data.originWidth / global.width) * 100 + '%';
-      drag.data.style.height = (drag.data.originHeight / global.height) * 100 + '%';
-      drag.data.style.left = (e.offsetX / global.width) * 100 + '%';
-      drag.data.style.top = (e.offsetY / global.height) * 100 + '%';
+      drag.data.style.left = e.offsetX;
+      drag.data.style.top = e.offsetY;
     }
   }
 });
@@ -67,8 +65,8 @@ class LibraryItem extends React.Component {
     e.preventDefault();
     drag.isDown = true;
     drag.data = lodash.cloneDeep(this.props.data);
-    drag.data.originWidth = drag.data.style.width;
-    drag.data.originHeight = drag.data.style.height;
+    drag.data.originStyle = lodash.cloneDeep(drag.data.style);
+    drag.data.uuid = uuidv4();
     timeout = setTimeout(() => {
       drag.isMove = true;
       document.body.classList.add('drag');
@@ -76,7 +74,7 @@ class LibraryItem extends React.Component {
   }
 
   render() {
-    const { name, id } = this.props.data;
+    let { name, id } = this.props.data;
     return <div class="library-item" title={id}>
       <div class="icon" ref={el => this.icon = el} onMouseDown={e => this.down(e)}/>
       <div class="name" onMouseDown={e => this.down(e)}>{name}</div>

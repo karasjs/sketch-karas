@@ -2,9 +2,10 @@ import React from 'react';
 import { observer, inject } from 'mobx-react';
 
 import LayerItem from './LayerItem';
+import TimeLineItem from './TimeLineItem';
 import layer from '../store/layer';
 
-function formatTime(t) {
+function calTime(t) {
   let hour = 0;
   let minute = 0;
   let second = 0;
@@ -23,7 +24,7 @@ function formatTime(t) {
   let ms = t;
   minute = String(minute);
   second = String(second);
-  ms = String(ms);
+  ms = String(ms).replace('.', '');
   if(minute.length < 2) {
     minute = '0' + minute;
   }
@@ -36,11 +37,40 @@ function formatTime(t) {
   else if(ms.length < 3) {
     ms = '0' + ms;
   }
+  else if(ms.length > 3) {
+    ms = ms.slice(0, 3);
+  }
+  return {
+    hour,
+    minute,
+    second,
+    ms,
+  };
+}
+
+function formatTime(t) {
+  let {
+    hour,
+    minute,
+    second,
+    ms,
+  } = calTime(t);
+  return `${hour}:${minute}:${second}.${ms}`;
+}
+
+function frame2time(i, fps) {
+  let {
+    hour,
+    minute,
+    second,
+    ms,
+  } = calTime(i * 1000 / fps);
   return `${hour}:${minute}:${second}.${ms}`;
 }
 
 @inject('timeline')
 @inject('layer')
+@inject('global')
 @observer
 class Timeline extends React.Component {
   fps() {}
@@ -50,8 +80,9 @@ class Timeline extends React.Component {
   }
 
   render() {
-    const { currentTime, totalFrame, fps } = this.props.timeline;
-    const { list } = this.props.layer;
+    let { currentTime, totalFrame } = this.props.timeline;
+    let { fps } = this.props.global;
+    let { list } = this.props.layer;
     return <div class="timeline">
       <div class="data">
         <div class="num">
@@ -63,7 +94,7 @@ class Timeline extends React.Component {
         </div>
         <div class="layer">
           {
-            list.map(item => <LayerItem data={item}/>)
+            list.map(item => <LayerItem data={item} key={item.uuid}/>)
           }
         </div>
         <div class="fn">
@@ -80,6 +111,31 @@ class Timeline extends React.Component {
           <li class="end"/>
           <li class="repeat"/>
         </ul>
+        <div class="frame-time">
+          <ul class="frame-num">
+            {
+              new Array(totalFrame).fill(1).map((item, i) => {
+                if(i % 5 === 0) {
+                  return <li key={i}>{i}</li>;
+                }
+                return <li key={i}/>
+              })
+            }
+          </ul>
+          <div class="layer">
+            {
+              list.map(item => <TimeLineItem data={item} key={item.uuid}/>)
+            }
+          </div>
+          <div class="time-num">
+            {
+              new Array(Math.ceil(totalFrame / 10)).fill(1).map((item, i) => {
+                return <li key={i}>{frame2time(i, fps)}</li>;
+              })
+            }
+          </div>
+          <div class="point"/>
+        </div>
       </div>
     </div>;
   }

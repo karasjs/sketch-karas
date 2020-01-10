@@ -27,25 +27,21 @@ export default {
       el
     );
   },
-  init(list, el) {
-    let children = list.map(item => {
-      console.log(item);
-      let { points, style } = item;
-      if(item.type === type.SHAPE_PATH) {
-        return <$polygon
-          points={points}
-          style={{
-            ...style,
-            position: 'absolute',
-          }}
-        />;
-      }
-    });
-    return karas.render(
-      <svg width={global.width} height={global.height}>
-        {children}
-      </svg>,
-      el
-    );
+  init(data, el) {
+    if(data.type === type.SHAPE_PATH) {
+      let { points, style } = data;
+      return karas.render(
+        <svg width={global.width} height={global.height}>
+          <$polygon
+            points={points}
+            style={{
+              ...style,
+              position: 'absolute',
+            }}
+          />
+        </svg>,
+        el
+      );
+    }
   },
 };

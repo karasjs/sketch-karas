@@ -17,13 +17,7 @@ import message from './message';
 //   e.preventDefault();
 // });
 
-let app;
-
 class App extends React.Component {
-  componentDidMount() {
-    app = this;
-  }
-
   render() {
     return <>
       <Tool/>
@@ -51,7 +45,6 @@ window.g_init = json => {
   console.log('g_init', json);
   store.library.update(json.library.list);
   store.layer.update(json.layer.list);
-  app.preview.init();
 };
 
 window.g_updateLibrary = json => {

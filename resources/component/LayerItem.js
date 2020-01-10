@@ -24,12 +24,11 @@ class LayerItem extends React.Component {
   }
 
   render() {
-    const { mode, data } = this.props;
-    const { lock, name, id, spread, active } = data;
-    if(mode === 'stage') {}
+    const { data } = this.props;
+    const { lock, name, uuid, spread, active } = data;
     return <div class={`layer-item ${active && 'active'}`} onClick={() => this.click()}>
       <div class={`lock ${lock && 'ing'}`} onClick={e => this.lock(e)}/>
-      <div class="name" title={id}>{name}</div>
+      <div class="name" title={uuid}>{name}</div>
       <div class={`spread ${spread && 'ing'}`} onClick={e => this.spread(e)}/>
     </div>;
   }

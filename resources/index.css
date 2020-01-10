@@ -117,23 +117,33 @@ body.drag{
 }
 
 .tool{
-  width:24px;
   background:#4A4A4A;
 
   ul{
-    margin:2px auto;
-    width:18px;
+    margin:0 auto;
+    padding:0 2px;
+    width:24px;
     li{
-      width:16px;
-      height:16px;
-      border:1px solid transparent;
+      margin:2px 0;
+      width:24px;
+      height:24px;
+      border-radius:2px;
 
       &:hover{
-        background-color:rgba(255, 255, 255, 0.2) !important;
+        background-color:rgba(0, 0, 0, 0.2) !important;
+      }
+
+      &.active{
+        background-color:rgba(0, 0, 0, 0.5) !important;
       }
 
       &.select{
         background:url(img/select.png) no-repeat center;
+        background-size:contain;
+      }
+
+      &.select2{
+        background:url(img/select2.png) no-repeat center;
         background-size:contain;
       }
 
@@ -163,7 +173,15 @@ body.drag{
       top:50%;
       background:url(img/bg.png) repeat 0 0;
       background-size:16px 16px;
-      transform:translate3d(-50%, -50%, 0);
+      transform:translate(-50%, -50%);
+
+      .stage-item{
+        position:absolute;
+        left:0;
+        top:0;
+        width:100%;
+        transform:tranlateZ(0);
+      }
     }
   }
 
@@ -191,15 +209,14 @@ body.drag{
 
       .layer{
         flex:1;
-        margin-top:12px;
+        margin-top:16px;
 
         .layer-item{
           display:flex;
           align-items:center;
-          height:18px;
+          height:20px;
           background:#2e2f30;
           border:1px solid #1d1e1f;
-          border-bottom-color:#2e2f30;
 
           &.active{
             border-color:#a33;
@@ -207,7 +224,7 @@ body.drag{
 
           .lock{
             width:18px;
-            height:18px;
+            height:20px;
             background:url(img/unlock.png) no-repeat center;
             background-size:11px 13px;
 
@@ -227,7 +244,7 @@ body.drag{
 
           .spread{
             width:18px;
-            height:18px;
+            height:20px;
             background:url(img/spread.png) no-repeat center;
             background-size:8px 11px;
             transition:transform 0.2s;
@@ -271,6 +288,9 @@ body.drag{
 
     .panel{
       flex:1;
+      display:flex;
+      flex-direction:column;
+      position:relative;
 
       .btn{
         display:flex;
@@ -278,7 +298,6 @@ body.drag{
         align-items:center;
 
         li{
-          margin-left:2px;
           width:18px;
           height:18px;
 
@@ -318,6 +337,99 @@ body.drag{
             background:url(img/repeat.png) no-repeat center;
             background-size:14px 12px;
           }
+        }
+      }
+
+      .frame-time{
+        flex:1;
+        position:relative;
+        padding:0 1px;
+        overflow:hidden;
+
+        .frame-num{
+          display:flex;
+          flex-wrap:nowrap;
+          position:absolute;
+          left:1px;
+          top:0;
+          width:100%;
+          height:16px;
+
+          li{
+            flex-shrink:0;
+            position:relative;
+            width:10px;
+            flex-basis:10px;
+            font-size:9px;
+            line-height:12px;
+            color:#595959;
+
+            &:after{
+              position:absolute;
+              left:0;
+              top:11px;
+              width:0;
+              height:5px;
+              border-left:1px solid #595959;
+              content:' ';
+            }
+          }
+        }
+
+        .layer{
+          position:absolute;
+          left:1px;
+          top:16px;
+          bottom:18px;
+          width:100%;
+
+          .timeline-item{
+            height:20px;
+            background:url(img/fs.png) repeat-x 0 0;
+            background-size:contain;
+            border:1px solid transparent;
+          }
+        }
+
+        .time-num{
+          display:flex;
+          flex-wrap:nowrap;
+          position:absolute;
+          left:1px;
+          bottom:0;
+          width:100%;
+          height:18px;
+
+          li{
+            flex-shrink:0;
+            position:relative;
+            padding-top:6px;
+            width:100px;
+            flex-basis:100px;
+            font-size:9px;
+            line-height:12px;
+            color:#595959;
+
+            &:after{
+              position:absolute;
+              left:0;
+              top:1px;
+              width:0;
+              height:5px;
+              border-left:1px solid #595959;
+              content:' ';
+            }
+          }
+        }
+
+        .point{
+          position:absolute;
+          left:1px;
+          top:17px;
+          bottom:18px;
+          width:0;
+          border-left:1px solid #D0021B;
+          opacity:0.8;
         }
       }
     }

@@ -2,14 +2,15 @@ import React from 'react';
 import { observer, inject } from 'mobx-react';
 
 import drag from './drag';
-import preview from './preview.csx';
 import layer from '../store/layer';
+import StageItem from './StageItem';
 
 @inject('global')
+@inject('layer')
 @observer
 class Preview extends React.Component {
-  init() {
-    preview.init(layer.list, this.stage);
+  componentDidMount() {
+    this.stage.addEventListener('click', this.click.bind(this));
   }
 
   enter() {
@@ -20,8 +21,13 @@ class Preview extends React.Component {
     drag.isEnter = false;
   }
 
+  click(e) {
+    console.log(e);
+  }
+
   render() {
-    const { width, height } = this.props.global;
+    let { width, height } = this.props.global;
+    let { list } = this.props.layer;
     return <div class="preview">
       <div class="stage"
            ref={el => this.stage = el}
@@ -30,7 +36,17 @@ class Preview extends React.Component {
            style={{
              width,
              height,
-           }}/>
+           }}>
+        {
+          list.map(item =>
+            <StageItem
+              data={item}
+              width={width}
+              height={height}
+              key={item.uuid}
+            />)
+        }
+      </div>
     </div>;
   }
 }
