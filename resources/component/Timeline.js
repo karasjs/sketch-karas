@@ -24,7 +24,7 @@ function calTime(t) {
   let ms = t;
   minute = String(minute);
   second = String(second);
-  ms = String(ms).replace('.', '');
+  ms = String(ms * 1000).replace('.', '');
   if(minute.length < 2) {
     minute = '0' + minute;
   }
@@ -130,7 +130,7 @@ class Timeline extends React.Component {
           <div class="time-num">
             {
               new Array(Math.ceil(totalFrame / 10)).fill(1).map((item, i) => {
-                return <li key={i}>{frame2time(i, fps)}</li>;
+                return <li key={i}>{frame2time(i * 10, fps)}</li>;
               })
             }
           </div>

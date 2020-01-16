@@ -386,7 +386,7 @@ body.drag{
           .timeline-item{
             height:20px;
             background:url(img/fs.png) repeat-x 0 0;
-            background-size:contain;
+            background-size:auto 20px;
             border:1px solid transparent;
           }
         }
