@@ -10,6 +10,7 @@ import Timeline from './component/Timeline';
 import Confirm from './component/Confirm';
 import Preview from './component/Preview';
 import Global from './component/Global';
+import Attr from './component/Attr';
 import message from './message';
 
 // disable the context menu (eg. the right click menu) to have a more native feel
@@ -26,7 +27,7 @@ class App extends React.Component {
         <Timeline/>
       </div>
       <div class="side">
-        <Global/>
+        <Attr/>
         <Library/>
       </div>
       <Confirm/>

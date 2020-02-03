@@ -437,7 +437,7 @@ body.drag{
 }
 
 .side{
-  width:200px;
+  width:250px;
   background:#2e2f30;
 
   .global{
@@ -457,6 +457,58 @@ body.drag{
       }
       td{
         padding:0 2px;
+      }
+    }
+  }
+
+  .attr{
+    h3{
+      padding:0 5px;
+      background:#454647;
+      border-bottom:1px solid #575759;
+      color:#A1A1A2;
+      font-size:14px;
+      line-height:24px;
+    }
+
+    .list{
+      display:flex;
+      flex-wrap:wrap;
+      padding:8px 0 0 10px;
+      opacity:0.5;
+
+      &.enable{
+        opacity:1;
+      }
+
+      .item{
+        position:relative;
+        margin:0 10px 8px 0;
+
+        input{
+          padding:0 20px 0 2px;
+          width:46px;
+          height:18px;
+          background:#454545;
+          border:1px solid #575657;
+          border-radius:4px;
+          cursor:auto;
+          font-size:10px;
+          color:#FFF;
+        }
+
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+          -webkit-appearance: none;
+        }
+
+        span{
+          position:absolute;
+          right:10px;
+          top:0;
+          color:#9E9E9E;
+          line-height:20px;
+        }
       }
     }
   }

@@ -4,6 +4,7 @@ import timeline from './timeline';
 import layer from './layer';
 import global from './global';
 import tool from './tool';
+import attr from './attr';
 
 export default {
   library,
@@ -12,4 +13,5 @@ export default {
   layer,
   global,
   tool,
+  attr,
 };
