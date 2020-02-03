@@ -4,6 +4,7 @@ import message from '../message';
 
 class Library {
   @observable list = [];
+  @observable current = null;
   @action update(v) {
     this.list = v || [];
   }
@@ -17,6 +18,21 @@ class Library {
       }
     }
     message.updateLibrary(this.list);
+  }
+  @action setCurrent(id) {
+    if(!id) {
+      return;
+    }
+    for(let i = 0, len = this.list.length; i < len; i++) {
+      let item = this.list[i];
+      if(item.id === id && !item.current) {
+        item.current = true;
+        this.current = item;
+      }
+      else if(item.id !== id && item.current) {
+        item.current = false;
+      }
+    }
   }
 }
 

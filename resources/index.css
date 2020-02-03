@@ -465,6 +465,7 @@ body.drag{
     h3{
       padding:0 5px;
       background:#454647;
+      border-top:1px solid #575759;
       border-bottom:1px solid #575759;
       color:#A1A1A2;
       font-size:14px;
@@ -494,7 +495,7 @@ body.drag{
           border-radius:4px;
           cursor:auto;
           font-size:10px;
-          color:#FFF;
+          color:#EEE;
         }
 
         input::-webkit-outer-spin-button,
@@ -514,23 +515,42 @@ body.drag{
   }
 
   .library{
-    h1{
-      padding:2px 5px;
-      color:#fff;
+    h3{
+      padding:0 5px;
+      background:#454647;
+      border-top:1px solid #575759;
+      border-bottom:1px solid #575759;
+      color:#A1A1A2;
       font-size:14px;
+      line-height:24px;
+    }
+
+    .preview-l{
+      margin:5px;
+      height:100px;
+      border:1px solid #000;
+      background:url(img/bg2.png) repeat 0 0;
+      background-size:8px 8px;
     }
 
     .library-item{
       display:flex;
       align-items:center;
+      margin:0 5px;
       padding:0 2px;
       height:20px;
       border-bottom:1px solid rgba(0, 0, 0, 0.2);
+
+      &.current{
+        background:#F00;
+      }
 
       .icon{
         margin-right:5px;
         width:16px;
         height:16px;
+        background:url(img/l-geom.png) no-repeat center;
+        background-size:contain;
       }
 
       .name{

@@ -7,7 +7,6 @@ import type from '../../src/type';
 import drag from './drag';
 import layer from '../store/layer';
 import library from '../store/library';
-import preview from './preview.csx';
 
 let timeout;
 
@@ -28,31 +27,23 @@ document.body.addEventListener('mousemove', e => {
   }
 });
 document.body.addEventListener('mouseup', e => {
-  if(drag.isMove) {
-    drag.isDown = false;
-    drag.isMove = false;
-    document.body.classList.remove('drag');
-    if(drag.isEnter && drag.data) {
-      layer.add(drag.data);
-    }
-    drag.isEnter = false;
-    drag.data = null;
+  if(timeout) {
+    clearTimeout(timeout);
+    timeout = null;
   }
+  if(drag.isMove && drag.isEnter && drag.data) {
+    layer.add(drag.data);
+  }
+  document.body.classList.remove('drag');
+  drag.isDown = false;
+  drag.isMove = false;
+  drag.isEnter = false;
+  drag.data = null;
 });
 
 @inject('confirm')
 @observer
 class LibraryItem extends React.Component {
-  componentDidMount() {
-    if(this.isMeta) {
-      preview.icon(this.props.data, this.icon);
-    }
-  }
-
-  componentWillUnmount() {
-    this.icon.innerHTML = '';
-  }
-
   edit() {
   }
 
@@ -64,6 +55,7 @@ class LibraryItem extends React.Component {
   down(e) {
     e.preventDefault();
     drag.isDown = true;
+    // clone数据防止对库元素干扰，将clone的数据放入舞台
     drag.data = lodash.cloneDeep(this.props.data);
     drag.data.originStyle = lodash.cloneDeep(drag.data.style);
     drag.data.uuid = uuidv4();
@@ -73,10 +65,16 @@ class LibraryItem extends React.Component {
     }, 100);
   }
 
+  click() {
+    library.setCurrent(this.props.data.id);
+  }
+
   render() {
-    let { name, id } = this.props.data;
-    return <div class="library-item" title={id}>
-      <div class="icon" ref={el => this.icon = el} onMouseDown={e => this.down(e)}/>
+    let { name, id, current } = this.props.data;
+    return <div class={`library-item ${current && 'current'}`}
+                title={id}
+                onClick={() => this.click()}>
+      <div class="icon" onMouseDown={e => this.down(e)}/>
       <div class="name" onMouseDown={e => this.down(e)}>{name}</div>
       <div class="edit" onClick={() => this.edit()}/>
       <div class="del" onClick={() => this.del()}/>

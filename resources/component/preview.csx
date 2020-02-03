@@ -4,18 +4,21 @@ import type from '../../src/type';
 import global from '../store/global';
 
 export default {
-  icon(data, el) {
-    let { points, style, style: { width, height } } = data;
-    let scale = Math.min(16 / width, 16 / height);
+  library(data, el) {
+    let { points, style, style: { width, height, strokeWidth } } = data;
+    let clientWidth = el.clientWidth;
+    let clientHeight = el.clientHeight;
+    let w = width + strokeWidth;
+    let h = height + strokeWidth;
+    let scale = Math.min(clientWidth / w, clientHeight / h);
     return karas.render(
-      <svg width="16" height="16">
+      <svg width={clientWidth} height={clientHeight}>
         <$polygon
           points={points}
           style={{
             position: 'absolute',
-            left: (16 - width * scale) * 0.5,
-            top: (16 - height * scale) * 0.5,
-            margin: '0 auto',
+            left: (clientWidth - width * scale) * 0.5,
+            top: (clientHeight - height * scale) * 0.5,
             width: width * scale,
             height: height * scale,
             fill: style.fill,
