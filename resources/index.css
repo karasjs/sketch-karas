@@ -371,6 +371,7 @@ body.drag{
               width:0;
               height:5px;
               border-left:1px solid #595959;
+              transform:translateX(-50%);
               content:' ';
             }
           }
@@ -379,7 +380,7 @@ body.drag{
         .layer{
           position:absolute;
           left:1px;
-          top:16px;
+          top:17px;
           bottom:18px;
           width:100%;
 
@@ -387,7 +388,6 @@ body.drag{
             height:20px;
             background:url(img/fs.png) repeat-x 0 0;
             background-size:auto 20px;
-            border:1px solid transparent;
           }
         }
 
@@ -417,6 +417,7 @@ body.drag{
               width:0;
               height:5px;
               border-left:1px solid #595959;
+              transform:translateX(-50%);
               content:' ';
             }
           }
@@ -427,9 +428,32 @@ body.drag{
           left:1px;
           top:17px;
           bottom:18px;
-          width:0;
-          border-left:1px solid #D0021B;
-          opacity:0.8;
+          box-sizing:border-box;
+          width:10px;
+          opacity:0.7;
+
+          &:before{
+            position:absolute;
+            left:0;
+            top:-7px;
+            width:100%;
+            height:7px;
+            box-sizing:border-box;
+            border:1px solid #D0021B;
+            background:rgba(208, 0, 27, 0.3);
+            content:' ';
+          }
+
+          &:after{
+            position:absolute;
+            left:50%;
+            top:0;
+            bottom:0;
+            width:0;
+            border-left:1px solid #D0021B;
+            transform:translateX(-50%);
+            content:' ';
+          }
         }
       }
     }
@@ -441,22 +465,54 @@ body.drag{
   background:#2e2f30;
 
   .global{
-    padding:2px 5px;
-
-    h1{
-      color:#fff;
+    h3{
+      padding:0 5px;
+      background:#454647;
+      border-top:1px solid #575759;
+      border-bottom:1px solid #575759;
+      color:#A1A1A2;
       font-size:14px;
+      line-height:24px;
     }
 
-    table{
-      font-size:10px;
+    .list{
+      display:flex;
+      flex-wrap:wrap;
+      padding:8px 0 0 10px;
+      opacity:0.5;
 
-      th,td{
-        font-weight:400;
-        width:30px;
+      &.enable{
+        opacity:1;
       }
-      td{
-        padding:0 2px;
+
+      .item{
+        position:relative;
+        margin:0 10px 8px 0;
+
+        input{
+          padding:0 20px 0 5px;
+          width:43px;
+          height:18px;
+          background:#444;
+          border:1px solid #555;
+          border-radius:4px;
+          cursor:auto;
+          font-size:10px;
+          color:#FFF;
+        }
+
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+          -webkit-appearance: none;
+        }
+
+        span{
+          position:absolute;
+          right:5px;
+          top:0;
+          color:#9E9E9E;
+          line-height:20px;
+        }
       }
     }
   }
@@ -487,15 +543,15 @@ body.drag{
         margin:0 10px 8px 0;
 
         input{
-          padding:0 20px 0 2px;
-          width:46px;
+          padding:0 20px 0 5px;
+          width:43px;
           height:18px;
-          background:#454545;
-          border:1px solid #575657;
+          background:#444;
+          border:1px solid #555;
           border-radius:4px;
           cursor:auto;
           font-size:10px;
-          color:#EEE;
+          color:#FFF;
         }
 
         input::-webkit-outer-spin-button,
@@ -505,7 +561,7 @@ body.drag{
 
         span{
           position:absolute;
-          right:10px;
+          right:5px;
           top:0;
           color:#9E9E9E;
           line-height:20px;
@@ -536,13 +592,11 @@ body.drag{
     .library-item{
       display:flex;
       align-items:center;
-      margin:0 5px;
-      padding:0 2px;
+      padding:0 5px;
       height:20px;
-      border-bottom:1px solid rgba(0, 0, 0, 0.2);
 
       &.current{
-        background:#F00;
+        background:#575759;
       }
 
       .icon{

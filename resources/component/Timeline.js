@@ -73,8 +73,6 @@ function frame2time(i, fps) {
 @inject('global')
 @observer
 class Timeline extends React.Component {
-  fps() {}
-
   del() {
     layer.delActive();
   }
@@ -89,8 +87,6 @@ class Timeline extends React.Component {
           <span>{formatTime(currentTime)}</span>
           <span> / </span>
           <span>{totalFrame}</span>
-          <span> / </span>
-          <span onClick={() => this.fps()}>{fps}fps</span>
         </div>
         <div class="layer">
           {

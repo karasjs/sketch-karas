@@ -1,10 +1,10 @@
 import { action, observable } from 'mobx';
 
 class Global {
-  @observable fps = 60;
+  @observable enable = true;
   @observable width = 400;
   @observable height = 300;
-  @observable bgc = 'transparent';
+  @observable fps = 60;
 }
 
 export default new Global();

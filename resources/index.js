@@ -27,6 +27,7 @@ class App extends React.Component {
         <Timeline/>
       </div>
       <div class="side">
+        <Global/>
         <Attr/>
         <Library/>
       </div>

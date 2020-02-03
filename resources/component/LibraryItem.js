@@ -26,7 +26,7 @@ document.body.addEventListener('mousemove', e => {
     }
   }
 });
-document.body.addEventListener('mouseup', e => {
+document.body.addEventListener('mouseup', () => {
   if(timeout) {
     clearTimeout(timeout);
     timeout = null;

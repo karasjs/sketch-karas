@@ -11,6 +11,7 @@ export default {
     let w = width + strokeWidth;
     let h = height + strokeWidth;
     let scale = Math.min(clientWidth / w, clientHeight / h);
+    scale *= 0.8;
     return karas.render(
       <svg width={clientWidth} height={clientHeight}>
         <$polygon

@@ -5,25 +5,23 @@ import { observer, inject } from 'mobx-react';
 @observer
 class Global extends React.Component {
   render() {
-    const { width, height, fps, bgc } = this.props.global;
+    const { width, height, fps, enable } = this.props.global;
     return <div class="global">
-      <h1>全局属性</h1>
-      <table>
-        <tbody>
-        <tr>
-          <th>width:</th>
-          <td>{width}</td>
-          <th>height:</th>
-          <td>{height}</td>
-        </tr>
-        <tr>
-          <th>fps:</th>
-          <td>{fps}</td>
-          <th>bgc:</th>
-          <td>{bgc}</td>
-        </tr>
-        </tbody>
-      </table>
+      <h3>全局</h3>
+      <div class="list">
+        <div className="item">
+          <input type="number" value={width} readOnly={!enable}/>
+          <span>W</span>
+        </div>
+        <div className="item">
+          <input type="number" value={height} readOnly={!enable}/>
+          <span>H</span>
+        </div>
+        <div className="item">
+          <input type="number" value={fps} readOnly={!enable}/>
+          <span>FPS</span>
+        </div>
+      </div>
     </div>;
   }
 }
