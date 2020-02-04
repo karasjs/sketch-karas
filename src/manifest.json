@@ -25,6 +25,12 @@
       "identifier": "clearLibrary",
       "script": "./clearLibrary.js",
       "handler": "clearLibrary"
+    },
+    {
+      "name": "清空图层",
+      "identifier": "clearLayer",
+      "script": "./clearLayer.js",
+      "handler": "clearLayer"
     }
   ],
   "menu": {
@@ -32,7 +38,8 @@
     "items": [
       "animation",
       "add2Library",
-      "clearLibrary"
+      "clearLibrary",
+      "clearLayer"
     ]
   }
 }

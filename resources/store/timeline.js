@@ -4,12 +4,23 @@ import global from './global';
 
 class Timeline {
   @observable currentTime = 0;
-  @observable totalTime = 100;
+  @observable totalTime = 0;
   @computed get currentFrame() {
     let per = 1000 / global.fps;
     return Math.floor(this.currentTime / per);
   }
-  @observable totalFrame = 100;
+  @computed get totalFrame() {
+    let per = 1000 / global.fps;
+    return Math.floor(this.totalTime / per);
+  };
+  @computed get maxFrame() {
+    return Math.max(this.totalFrame, 100);
+  }
+  @action setCurrentTime(v) {
+    if(v <= this.totalTime) {
+      this.currentTime = v;
+    }
+  }
 }
 
 export default new Timeline();

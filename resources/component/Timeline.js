@@ -78,7 +78,7 @@ document.body.addEventListener('mousemove', e => {
     if(e.pageX > ox) {
       // 先算一格多长时间
       let per = 1000 / global.fps;
-      timeline.currentTime = Math.floor((e.pageX - ox) / 10) * per;
+      timeline.setCurrentTime(Math.floor((e.pageX - ox) / 10) * per);
     }
     else {
       timeline.currentTime = 0;
@@ -110,11 +110,11 @@ class Timeline extends React.Component {
     isDrag = false;
     ox = this.el.getBoundingClientRect().left;
     let per = 1000 / global.fps;
-    timeline.currentTime = Math.floor((e.pageX - ox) / 10) * per;
+    timeline.setCurrentTime(Math.floor((e.pageX - ox) / 10) * per);
   }
 
   render() {
-    let { currentTime, currentFrame, totalFrame } = this.props.timeline;
+    let { currentTime, currentFrame, maxFrame } = this.props.timeline;
     let { fps } = this.props.global;
     let { list } = this.props.layer;
     return <div class="timeline">
@@ -122,7 +122,7 @@ class Timeline extends React.Component {
         <div class="num">
           <span>{formatTime(currentTime)}</span>
           <span> / </span>
-          <span>{currentFrame + 1}</span>
+          <span>{currentFrame}</span>
         </div>
         <div class="layer">
           {
@@ -146,7 +146,7 @@ class Timeline extends React.Component {
         <div class="frame-time" ref={el => this.el = el}>
           <ul class="frame-num" onClick={e => this.clickFrameNum(e)}>
             {
-              new Array(Math.ceil(totalFrame)).fill(1).map((item, i) => {
+              new Array(Math.ceil(maxFrame)).fill(1).map((item, i) => {
                 return <li key={i}>{i * 5}</li>;
               })
             }
@@ -158,7 +158,7 @@ class Timeline extends React.Component {
           </div>
           <div class="time-num">
             {
-              new Array(Math.ceil(totalFrame / 10)).fill(1).map((item, i) => {
+              new Array(Math.ceil(maxFrame / 10)).fill(1).map((item, i) => {
                 return <li key={i}>{frame2time(i * 10, fps)}</li>;
               })
             }

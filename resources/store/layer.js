@@ -1,8 +1,10 @@
 import { action, observable } from 'mobx';
 
+import timeline from './timeline';
 import message from '../message';
 
 class Layer {
+  count = 0; // 图层名字自动生成计数
   @observable list = [];
   @action update(v) {
     this.list = v || [];

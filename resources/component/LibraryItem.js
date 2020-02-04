@@ -32,6 +32,7 @@ document.body.addEventListener('mouseup', () => {
     timeout = null;
   }
   if(drag.isMove && drag.isEnter && drag.data) {
+    // 检查当前图层当前帧是否有内容，强制不允许出现重叠的图层元素
     layer.add(drag.data);
   }
   document.body.classList.remove('drag');
