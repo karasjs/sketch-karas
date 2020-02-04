@@ -6,7 +6,7 @@ import preview from './preview.csx';
 @observer
 class StageItem extends React.Component {
   componentDidMount() {
-    preview.init(this.props.data, this.el);
+    preview.init(this.props.data.data, this.el);
   }
 
   componentWillUnmount() {

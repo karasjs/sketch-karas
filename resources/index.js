@@ -23,7 +23,7 @@ class App extends React.Component {
     return <>
       <Tool/>
       <div class="container">
-        <Preview ref={el => this.preview = el}/>
+        <Preview/>
         <Timeline/>
       </div>
       <div class="side">

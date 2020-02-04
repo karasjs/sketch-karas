@@ -5,7 +5,7 @@ import { observer, inject } from 'mobx-react';
 @observer
 class Global extends React.Component {
   render() {
-    const { width, height, fps, enable } = this.props.global;
+    let { width, height, fps, enable } = this.props.global;
     return <div class="global">
       <h3>全局</h3>
       <div class="list">

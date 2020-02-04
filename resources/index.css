@@ -219,7 +219,7 @@ body.drag{
           border:1px solid #1d1e1f;
 
           &.active{
-            border-color:#a33;
+            border-color:#4A90E2;
           }
 
           .lock{
@@ -354,7 +354,7 @@ body.drag{
           top:0;
           width:100%;
           height:17px;
-          background:url(img/ruler.png) repeat-x 0px 12px;
+          background:url(img/ruler.png) repeat-x 0 11px;
           background-size:50px 5px;
           transform:translateX(-0.5px);
           z-index:10;
@@ -378,9 +378,45 @@ body.drag{
           width:100%;
 
           .timeline-item{
+            position:relative;
             height:20px;
             background:url(img/fs.png) repeat-x 0 0;
             background-size:auto 20px;
+
+            .frame{
+              position:absolute;
+              height:100%;
+              background:#666;
+
+              b{
+                position:absolute;
+                left:10px;
+                top:50%;
+                right:0;
+                border-top:1px solid #0f0;
+              }
+            }
+
+            .frame-last{
+              position:absolute;
+              box-sizing:border-box;
+              width:10px;
+              height:100%;
+              background:#666;
+              border:1px solid transparent;
+
+              &:before{
+                position:absolute;
+                left:50%;
+                top:50%;
+                width:5px;
+                height:5px;
+                background:#000;
+                border-radius:100%;
+                transform:translate(-50%, -50%);
+                content:' ';
+              }
+            }
           }
         }
 

@@ -9,8 +9,13 @@ class Layer {
   @action update(v) {
     this.list = v || [];
   }
-  @action add(o) {
-    this.list.push(o);
+  @action add(data) {
+    // 每层限制只允许一个元素出现
+    this.list.push({
+      times: [timeline.currentTime],
+      active: true,
+      data,
+    });
     message.updateLayer(this.list);
   }
   @action clearActive() {
