@@ -10,23 +10,23 @@ class Attr extends React.Component {
       <h3>属性</h3>
       <div class={`list ${enable && 'enable'}`}>
         <div class="item">
-          <input type="number" value={x} readOnly={!enable}/>
+          <input type="number" defaultValue={x} readOnly={!enable}/>
           <span>X</span>
         </div>
         <div className="item">
-          <input type="number" value={y} readOnly={!enable}/>
+          <input type="number" defaultValue={y} readOnly={!enable}/>
           <span>Y</span>
         </div>
         <div className="item">
-          <input type="number" value={deg} readOnly={!enable}/>
+          <input type="number" defaultValue={deg} readOnly={!enable}/>
           <span>°</span>
         </div>
         <div className="item">
-          <input type="number" value={w} readOnly={!enable}/>
+          <input type="number" defaultValue={w} readOnly={!enable}/>
           <span>W</span>
         </div>
         <div className="item">
-          <input type="number" value={h} readOnly={!enable}/>
+          <input type="number" defaultValue={h} readOnly={!enable}/>
           <span>H</span>
         </div>
       </div>

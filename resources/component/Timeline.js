@@ -4,6 +4,8 @@ import { observer, inject } from 'mobx-react';
 import LayerItem from './LayerItem';
 import TimeLineItem from './TimeLineItem';
 import layer from '../store/layer';
+import timeline from '../store/timeline';
+import global from '../store/global';
 
 function calTime(t) {
   let hour = 0;
@@ -68,6 +70,26 @@ function frame2time(i, fps) {
   return `${hour}:${minute}:${second}.${ms}`;
 }
 
+let isDrag;
+let ox;
+
+document.body.addEventListener('mousemove', e => {
+  if(isDrag) {
+    if(e.pageX > ox) {
+      // 先算一格多长时间
+      let per = 1000 / global.fps;
+      timeline.currentTime = Math.floor((e.pageX - ox) / 10) * per;
+    }
+    else {
+      timeline.currentTime = 0;
+    }
+  }
+});
+
+document.body.addEventListener('mouseup', () => {
+  isDrag = false;
+});
+
 @inject('timeline')
 @inject('layer')
 @inject('global')
@@ -77,8 +99,22 @@ class Timeline extends React.Component {
     layer.delActive();
   }
 
+  down(e) {
+    e.preventDefault();
+    isDrag = true;
+    ox = this.el.getBoundingClientRect().left;
+  }
+
+  clickFrameNum(e) {
+    e.preventDefault();
+    isDrag = false;
+    ox = this.el.getBoundingClientRect().left;
+    let per = 1000 / global.fps;
+    timeline.currentTime = Math.floor((e.pageX - ox) / 10) * per;
+  }
+
   render() {
-    let { currentTime, totalFrame } = this.props.timeline;
+    let { currentTime, currentFrame, totalFrame } = this.props.timeline;
     let { fps } = this.props.global;
     let { list } = this.props.layer;
     return <div class="timeline">
@@ -86,7 +122,7 @@ class Timeline extends React.Component {
         <div class="num">
           <span>{formatTime(currentTime)}</span>
           <span> / </span>
-          <span>{totalFrame}</span>
+          <span>{currentFrame + 1}</span>
         </div>
         <div class="layer">
           {
@@ -107,8 +143,8 @@ class Timeline extends React.Component {
           <li class="end"/>
           <li class="repeat"/>
         </ul>
-        <div class="frame-time">
-          <ul class="frame-num">
+        <div class="frame-time" ref={el => this.el = el}>
+          <ul class="frame-num" onClick={e => this.clickFrameNum(e)}>
             {
               new Array(totalFrame).fill(1).map((item, i) => {
                 if(i % 5 === 0) {
@@ -130,7 +166,13 @@ class Timeline extends React.Component {
               })
             }
           </div>
-          <div class="point"/>
+          <div class="point"
+               style={{
+                 transform: `translateX(${currentFrame * 10}px)`,
+               }}
+               onMouseDown={e => this.down(e)}>
+            <b/>
+          </div>
         </div>
       </div>
     </div>;

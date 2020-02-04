@@ -10,15 +10,15 @@ class Global extends React.Component {
       <h3>全局</h3>
       <div class="list">
         <div className="item">
-          <input type="number" value={width} readOnly={!enable}/>
+          <input type="number" defaultValue={width} readOnly={!enable}/>
           <span>W</span>
         </div>
         <div className="item">
-          <input type="number" value={height} readOnly={!enable}/>
+          <input type="number" defaultValue={height} readOnly={!enable}/>
           <span>H</span>
         </div>
         <div className="item">
-          <input type="number" value={fps} readOnly={!enable}/>
+          <input type="number" defaultValue={fps} readOnly={!enable}/>
           <span>FPS</span>
         </div>
       </div>
