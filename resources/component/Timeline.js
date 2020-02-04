@@ -146,11 +146,8 @@ class Timeline extends React.Component {
         <div class="frame-time" ref={el => this.el = el}>
           <ul class="frame-num" onClick={e => this.clickFrameNum(e)}>
             {
-              new Array(totalFrame).fill(1).map((item, i) => {
-                if(i % 5 === 0) {
-                  return <li key={i}>{i}</li>;
-                }
-                return <li key={i}/>
+              new Array(Math.ceil(totalFrame)).fill(1).map((item, i) => {
+                return <li key={i}>{i * 5}</li>;
               })
             }
           </ul>
