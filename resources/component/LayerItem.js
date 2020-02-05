@@ -6,10 +6,12 @@ import layer from '../store/layer';
 @observer
 class LayerItem extends React.Component {
   click() {
-    layer.clearActive();
     let { data } = this.props;
-    data.active = true;
-    layer.save();
+    if(!data.active) {
+      layer.clearActive();
+      data.active = true;
+      layer.save();
+    }
   }
 
   lock(e) {

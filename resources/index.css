@@ -219,7 +219,7 @@ body.drag{
           border:1px solid #1d1e1f;
 
           &.active{
-            border-color:#4A90E2;
+            background:#444;
           }
 
           .lock{
@@ -403,7 +403,7 @@ body.drag{
               width:10px;
               height:100%;
               background:#666;
-              border:1px solid transparent;
+              border:1px solid #444;
 
               &:before{
                 position:absolute;
@@ -416,6 +416,15 @@ body.drag{
                 transform:translate(-50%, -50%);
                 content:' ';
               }
+            }
+
+            .empty{
+              position:absolute;
+              box-sizing:border-box;
+              width:10px;
+              height:100%;
+              background:#39f;
+              border:1px solid #444;
             }
           }
         }
