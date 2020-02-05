@@ -37,6 +37,7 @@
     "url": "git://github.com/karasjs/sketch-karas.git"
   },
   "dependencies": {
+    "karas": "^0.17.2"
   },
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "^7.7.4",
@@ -47,7 +48,6 @@
     "army8735-extract": "^2.0.6",
     "css-loader": "^3.4.0",
     "html-loader": "^0.5.5",
-    "karas": "^0.17.0",
     "karas-loader": "^0.3.0",
     "less": "^3.10.3",
     "less-loader": "^5.0.0",

@@ -84,9 +84,7 @@ export default function() {
         .catch(console.error);
     }
     else if(key === 'updateLayer') {
-      Settings.setDocumentSettingForKey(document, 'layer', {
-        list: value,
-      });
+      Settings.setDocumentSettingForKey(document, 'layer', value);
     }
     else if(key === 'updateLibrary') {
       Settings.setDocumentSettingForKey(document, 'library', {

@@ -126,7 +126,7 @@ class Timeline extends React.Component {
         </div>
         <div class="layer">
           {
-            list.map(item => <LayerItem data={item} key={item.data.uuid}/>)
+            list.reverse().map(item => <LayerItem data={item} key={item.data.uuid}/>)
           }
         </div>
         <div class="fn">
@@ -153,7 +153,7 @@ class Timeline extends React.Component {
           </ul>
           <div class="layer">
             {
-              list.map(item => <TimeLineItem data={item} key={item.data.uuid}/>)
+              list.reverse().map(item => <TimeLineItem data={item} key={item.data.uuid}/>)
             }
           </div>
           <div class="time-num">

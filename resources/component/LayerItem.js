@@ -9,6 +9,7 @@ class LayerItem extends React.Component {
     layer.clearActive();
     let { data } = this.props;
     data.active = true;
+    layer.save();
   }
 
   lock(e) {
@@ -25,7 +26,7 @@ class LayerItem extends React.Component {
 
   render() {
     let { data } = this.props;
-    let { lock, spread, active, data: { name, uuid } } = data;
+    let { lock, spread, active, name, data: { uuid } } = data;
     return <div class={`layer-item ${active && 'active'}`} onClick={() => this.click()}>
       <div class={`lock ${lock && 'ing'}`} onClick={e => this.lock(e)}/>
       <div class="name" title={uuid}>{name}</div>

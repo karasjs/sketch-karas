@@ -46,7 +46,7 @@ ReactDom.render(
 window.g_init = json => {
   console.log('g_init', json);
   store.library.update(json.library.list);
-  store.layer.update(json.layer.list);
+  store.layer.init(json.layer);
 };
 
 window.g_updateLibrary = json => {

@@ -38,7 +38,7 @@ class Preview extends React.Component {
              height,
            }}>
         {
-          list.map(item =>
+          list.reverse().map(item =>
             <StageItem
               data={item}
               width={width}

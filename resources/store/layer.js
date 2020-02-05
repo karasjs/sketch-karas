@@ -6,28 +6,47 @@ import message from '../message';
 class Layer {
   count = 0; // 图层名字自动生成计数
   @observable list = [];
+  @action init(v) {
+    this.count = v.count || 0;
+    this.list = v.list || [];
+  }
   @action update(v) {
     this.list = v || [];
+    this.save();
   }
   @action add(data) {
-    // 每层限制只允许一个元素出现
-    this.list.push({
+    let { list } = this;
+    // 每层限制只允许一个元素出现，激活最新层
+    list.forEach(item => {
+      item.active = false;
+    });
+    list.push({
       times: [timeline.currentTime],
       active: true,
       data,
+      name: `图层${this.count++}`,
     });
-    message.updateLayer(this.list);
+    this.save();
   }
   @action clearActive() {
-    this.list.forEach(item => item.active = false);
+    let { list } = this;
+    list.forEach(item => item.active = false);
+    this.save();
   }
   @action delActive() {
-    for(let i = this.list.length - 1; i >= 0; i--) {
-      if(this.list[i].active) {
-        this.list.splice(i, 1);
+    let { list } = this;
+    for(let i = list.length - 1; i >= 0; i--) {
+      if(list[i].active) {
+        list.splice(i, 1);
       }
     }
-    message.updateLayer(this.list);
+    this.save();
+  }
+  save() {
+    message.updateLayer({
+      count: this.count,
+      list: this.list,
+    });
   }
 }
 
