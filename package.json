@@ -26,8 +26,7 @@
     "postinstall": "npm run build && skpm-link",
     "dev": "skpm-build --watch & skpm log -f",
     "log": "skpm log",
-    "logs": "skpm log -f",
-    "webpack": "webpack --color"
+    "logs": "skpm log -f"
   },
   "resources": [
     "resources/index.js"
