@@ -209,14 +209,14 @@ body.drag{
 
       .layer{
         flex:1;
-        margin-top:16px;
+        margin-top:17px;
 
         .layer-item{
           display:flex;
           align-items:center;
+          margin:0 1px 1px;
           height:20px;
           background:#2e2f30;
-          border:1px solid #1d1e1f;
 
           &.active{
             background:#444;
@@ -413,6 +413,7 @@ body.drag{
 
           .timeline-item{
             position:relative;
+            margin-bottom:1px;
             height:20px;
             background:url(img/fs.png) repeat-x 0 0;
             background-size:auto 20px;
@@ -420,7 +421,7 @@ body.drag{
             .frame{
               position:absolute;
               height:100%;
-              background:#4A90E2;
+              background:#4A5062;
 
               &:before{
                 position:absolute;
@@ -440,7 +441,7 @@ body.drag{
               box-sizing:border-box;
               width:10px;
               height:100%;
-              background:#4A90E2;
+              background:#4A5062;
 
               &:before{
                 position:absolute;
@@ -452,6 +453,12 @@ body.drag{
                 box-shadow:0 0 2px rgba(0, 0, 0, 0.5);
                 transform:translate(-50%, -50%) rotate(45deg);
                 content:' ';
+              }
+            }
+
+            &.active{
+              .frame, .frame-last{
+                background:#4A90E2;
               }
             }
 

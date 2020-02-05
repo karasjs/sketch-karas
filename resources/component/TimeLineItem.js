@@ -11,7 +11,7 @@ document.body.addEventListener('click', e => {
       return;
     }
   }
-  layer.clearshowEmpty();
+  layer.clearShowEmpty();
   layer.save();
 });
 
@@ -25,14 +25,14 @@ class TimeLineItem extends React.Component {
     let needSave;
     // 点击到空白处即根元素，显示出定位帧以便添加
     if(e.target === this.el) {
-      layer.clearshowEmpty();
+      layer.clearShowEmpty();
       data.emptyTime = Math.floor((x - ox) / 10) * global.spf;
       data.showEmpty = true;
       needSave = true;
     }
     // 点在已有帧上
     // else if(e.target.classList.contains('frame') || e.target.classList.contains('frame-last')) {
-    //   layer.clearshowEmpty();
+    //   layer.clearShowEmpty();
     //   data.emptyTime = Math.floor((x - ox) / 10) * global.spf;
     //   data.showEmpty = true;
     //   needSave = true;
@@ -48,7 +48,7 @@ class TimeLineItem extends React.Component {
   }
 
   render() {
-    let { times, showEmpty, emptyTime, data } = this.props.data;
+    let { times, showEmpty, emptyTime, active, data } = this.props.data;
     let keyFrames = [];
     for(let i = 0, len = times.length; i < len - 1; i++) {
       let item = times[i];
@@ -59,7 +59,7 @@ class TimeLineItem extends React.Component {
         length: Math.round(next - index),
       });
     }
-    return <div class="timeline-item"
+    return <div class={`timeline-item ${active ? 'active' : ''}`}
                 ref={el => this.el = el}
                 onClick={e => this.click(e)}>
       {

@@ -48,7 +48,7 @@ class Layer {
     }
     this.save();
   }
-  @action clearshowEmpty() {
+  @action clearShowEmpty() {
     this.list.forEach(item => {
       item.showEmpty = false;
       item.emptyTime = 0;

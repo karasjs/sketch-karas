@@ -74,6 +74,12 @@ export default function() {
       let timeline = Settings.documentSettingForKey(document, 'timeline') || {};
       let layer = Settings.documentSettingForKey(document, 'layer') || {};
       let global = Settings.documentSettingForKey(document, 'global') || {};
+      // 初始化清空可能之前选择的空白定位帧
+      if(layer.list) {
+        layer.list.forEach(item => {
+          item.showEmpty = false;
+        });
+      }
       webContents
         .executeJavaScript(`g_init(${JSON.stringify({
           library,
