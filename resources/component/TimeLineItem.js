@@ -18,18 +18,25 @@ document.body.addEventListener('click', e => {
 @observer
 class TimeLineItem extends React.Component {
   click(e) {
+    e.preventDefault();
     let { data } = this.props;
+    let ox = this.el.getBoundingClientRect().left;
+    let x = e.pageX;
     let needSave;
     // 点击到空白处即根元素，显示出定位帧以便添加
     if(e.target === this.el) {
-      e.preventDefault();
       layer.clearshowEmpty();
-      let ox = this.el.getBoundingClientRect().left;
-      let x = e.pageX;
       data.emptyTime = Math.floor((x - ox) / 10) * global.spf;
       data.showEmpty = true;
       needSave = true;
     }
+    // 点在已有帧上
+    // else if(e.target.classList.contains('frame') || e.target.classList.contains('frame-last')) {
+    //   layer.clearshowEmpty();
+    //   data.emptyTime = Math.floor((x - ox) / 10) * global.spf;
+    //   data.showEmpty = true;
+    //   needSave = true;
+    // }
     if(!data.active) {
       layer.clearActive();
       data.active = true;
@@ -52,7 +59,6 @@ class TimeLineItem extends React.Component {
         length: Math.round(next - index),
       });
     }
-    console.log(times);
     return <div class="timeline-item"
                 ref={el => this.el = el}
                 onClick={e => this.click(e)}>

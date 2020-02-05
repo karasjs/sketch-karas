@@ -76,8 +76,10 @@ let ox;
 document.body.addEventListener('mousemove', e => {
   if(isDrag) {
     if(e.pageX > ox) {
-      // 先算一格多长时间
-      timeline.setCurrentTime(Math.floor((e.pageX - ox) / 10) * global.spf);
+      let v = Math.floor((e.pageX - ox) / 10) * global.spf;
+      if(v <= layer.maxTime) {
+        timeline.setCurrentTime(v);
+      }
     }
     else {
       timeline.currentTime = 0;
@@ -111,6 +113,10 @@ class Timeline extends React.Component {
     timeline.setCurrentTime(Math.floor((e.pageX - ox) / 10) * global.spf);
   }
 
+  clickAnimate(e) {
+    e.preventDefault();
+  }
+
   clickKf(e) {
     e.preventDefault();
     let { list } = this.props.layer;
@@ -126,9 +132,13 @@ class Timeline extends React.Component {
   }
 
   render() {
-    let { currentTime, currentFrame, maxFrame } = this.props.timeline;
+    let { currentTime, currentFrame } = this.props.timeline;
     let { fps } = this.props.global;
-    let { list, showKf } = this.props.layer;
+    let { maxFrame, list, showAnimate, showKf } = this.props.layer;
+    maxFrame += 100;
+    // 当停在关键帧上时需过滤，避免重复
+    if(showKf) {
+    }
     return <div class="timeline">
       <div class="data">
         <div class="num">
@@ -138,7 +148,7 @@ class Timeline extends React.Component {
         </div>
         <div class="layer">
           {
-            list.slice(0).reverse().map(item => <LayerItem data={item} key={item.data.uuid}/>)
+            list.slice(0).reverse().map(item => <LayerItem data={item} key={item.uuid}/>)
           }
         </div>
         <div class="fn">
@@ -149,6 +159,7 @@ class Timeline extends React.Component {
       <div class="panel">
         <ul class="btn">
           <li class="bezier"/>
+          <li class={`animate ${showAnimate ? 'enable' : ''}`} onClick={e => this.clickAnimate(e)}/>
           <li class={`kf ${showKf ? 'enable' : ''}`} onClick={e => this.clickKf(e)}/>
           <li class="start"/>
           <li class="play"/>
@@ -156,7 +167,9 @@ class Timeline extends React.Component {
           <li class="repeat"/>
         </ul>
         <div class="frame-time" ref={el => this.el = el}>
-          <ul class="frame-num" onClick={e => this.clickFrameNum(e)}>
+          <ul class="frame-num"
+              onMouseDown={e => e.preventDefault()}
+              onClick={e => this.clickFrameNum(e)}>
             {
               new Array(Math.ceil(maxFrame)).fill(1).map((item, i) => {
                 return <li key={i}>{i * 5}</li>;
@@ -165,10 +178,10 @@ class Timeline extends React.Component {
           </ul>
           <div class="layer" onMouseDown={e => e.preventDefault()}>
             {
-              list.slice(0).reverse().map(item => <TimeLineItem data={item} key={item.data.uuid}/>)
+              list.slice(0).reverse().map(item => <TimeLineItem data={item} key={item.uuid}/>)
             }
           </div>
-          <div class="time-num">
+          <div class="time-num" onMouseDown={e => e.preventDefault()}>
             {
               new Array(Math.ceil(maxFrame / 10)).fill(1).map((item, i) => {
                 return <li key={i}>{frame2time(i * 10, fps)}</li>;
@@ -178,9 +191,9 @@ class Timeline extends React.Component {
           <div class="point"
                style={{
                  transform: `translateX(${currentFrame * 10}px)`,
-               }}
-               onMouseDown={e => this.down(e)}>
-            <b/>
+               }}>
+            <b onMouseDown={e => this.down(e)}/>
+            <b onMouseDown={e => this.down(e)}/>
           </div>
         </div>
       </div>

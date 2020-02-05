@@ -1,7 +1,8 @@
 import { action, observable, computed } from 'mobx';
+import uuidv4 from 'uuid/v4';
 
-import timeline from './timeline';
 import message from '../message';
+import global from './global';
 
 class Layer {
   count = 0; // 图层名字自动生成计数
@@ -14,7 +15,7 @@ class Layer {
     this.list = v || [];
     this.save();
   }
-  @action add(data) {
+  @action add(data, currentTime) {
     let { list } = this;
     // 每层限制只允许一个元素出现，激活最新层
     list.forEach(item => {
@@ -23,7 +24,8 @@ class Layer {
       item.emptyTime = 0;
     });
     list.push({
-      times: [timeline.currentTime],
+      uuid: uuidv4(),
+      times: [currentTime],
       active: true,
       showEmpty: false,
       emptyTime: 0,
@@ -52,6 +54,15 @@ class Layer {
       item.emptyTime = 0;
     });
   }
+  @computed get showAnimate() {
+    let { list } = this;
+    for(let i = 0, len = list.length; i < len; i++) {
+      if(list[i].active) {
+        return true;
+      }
+    }
+    return false;
+  }
   @computed get showKf() {
     let { list } = this;
     for(let i = 0, len = list.length; i < len; i++) {
@@ -60,6 +71,18 @@ class Layer {
       }
     }
     return false;
+  }
+  @computed get maxTime() {
+    let max = 0;
+    this.list.forEach(item => {
+      item.times.forEach(item2 => {
+        max = Math.max(max, item2);
+      });
+    });
+    return max;
+  }
+  @computed get maxFrame() {
+    return Math.round(this.maxTime / global.spf);
   }
   save() {
     message.updateLayer({

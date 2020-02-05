@@ -43,7 +43,7 @@ class Preview extends React.Component {
               data={item}
               width={width}
               height={height}
-              key={item.data.uuid}
+              key={item.uuid}
             />)
         }
       </div>

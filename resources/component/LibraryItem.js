@@ -1,12 +1,12 @@
 import React from 'react';
 import { observer, inject } from 'mobx-react';
 import lodash from 'lodash';
-import uuidv4 from 'uuid/v4';
 
 import type from '../../src/type';
 import drag from './drag';
 import layer from '../store/layer';
 import library from '../store/library';
+import timeline from "../store/timeline";
 
 let timeout;
 
@@ -32,7 +32,7 @@ document.body.addEventListener('mouseup', () => {
     timeout = null;
   }
   if(drag.isMove && drag.isEnter && drag.data) {
-    layer.add(drag.data);
+    layer.add(drag.data, timeline.currentTime);
   }
   document.body.classList.remove('drag');
   drag.isDown = false;
@@ -58,7 +58,6 @@ class LibraryItem extends React.Component {
     // clone数据防止对库元素干扰，将clone的数据放入舞台
     drag.data = lodash.cloneDeep(this.props.data);
     drag.data.originStyle = lodash.cloneDeep(drag.data.style);
-    drag.data.uuid = uuidv4();
     timeout = setTimeout(() => {
       drag.isMove = true;
       document.body.classList.add('drag');
