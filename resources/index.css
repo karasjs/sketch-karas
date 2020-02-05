@@ -398,12 +398,16 @@ body.drag{
               height:100%;
               background:#666;
 
-              b{
+              &:before{
                 position:absolute;
-                left:10px;
+                left:5px;
                 top:50%;
-                right:0;
-                border-top:1px solid #0f0;
+                width:5px;
+                height:5px;
+                background:#000;
+                border-radius:100%;
+                transform:translate(-50%, -50%);
+                content:' ';
               }
             }
 
@@ -413,7 +417,6 @@ body.drag{
               width:10px;
               height:100%;
               background:#666;
-              border:1px solid #444;
 
               &:before{
                 position:absolute;

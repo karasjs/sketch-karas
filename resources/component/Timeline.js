@@ -116,7 +116,12 @@ class Timeline extends React.Component {
     let { list } = this.props.layer;
     for(let i = 0, len = list.length; i < len; i++) {
       let item = list[i];
-      if(item.showEmpty) {}
+      let { showEmpty, emptyTime } = item;
+      if(showEmpty) {
+        item.times.push(emptyTime);
+        layer.save();
+        return;
+      }
     }
   }
 

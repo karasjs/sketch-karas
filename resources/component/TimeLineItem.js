@@ -19,6 +19,7 @@ document.body.addEventListener('click', e => {
 class TimeLineItem extends React.Component {
   click(e) {
     let { data } = this.props;
+    let needSave;
     // 点击到空白处即根元素，显示出定位帧以便添加
     if(e.target === this.el) {
       e.preventDefault();
@@ -27,10 +28,14 @@ class TimeLineItem extends React.Component {
       let x = e.pageX;
       data.emptyTime = Math.floor((x - ox) / 10) * global.spf;
       data.showEmpty = true;
+      needSave = true;
     }
     if(!data.active) {
       layer.clearActive();
       data.active = true;
+      needSave = true;
+    }
+    if(needSave) {
       layer.save();
     }
   }
@@ -44,20 +49,22 @@ class TimeLineItem extends React.Component {
       let next = Math.floor(times[i + 1] / global.spf);
       keyFrames.push({
         index,
-        length: next - index,
+        length: Math.round(next - index),
       });
     }
+    console.log(times);
     return <div class="timeline-item"
                 ref={el => this.el = el}
                 onClick={e => this.click(e)}>
       {
-        keyFrames.map(item => <div className="frame" style={{
+        keyFrames.map((item, i) => (
+          <div className="frame" key={i} style={{
           left: Math.round(item.index * 10),
-          width: item.length,
-        }}><b/></div>)
+          width: item.length * 10,
+        }}/>))
       }
       <div className="frame-last" style={{
-        left: times[times.length - 1] * 10,
+        left: Math.round(times[times.length - 1] * 10 / global.spf),
       }}/>
       {showEmpty && <div class="empty" style={{
         left: Math.round(emptyTime * 10 / global.spf),
