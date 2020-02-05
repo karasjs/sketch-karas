@@ -6,12 +6,10 @@ class Timeline {
   @observable currentTime = 0;
   @observable totalTime = 0;
   @computed get currentFrame() {
-    let per = 1000 / global.fps;
-    return Math.round(this.currentTime / per);
+    return Math.round(this.currentTime / global.spf);
   }
   @computed get totalFrame() {
-    let per = 1000 / global.fps;
-    return Math.round(this.totalTime / per);
+    return Math.round(this.totalTime / global.spf);
   };
   @computed get maxFrame() {
     return Math.max(this.totalFrame, 100);

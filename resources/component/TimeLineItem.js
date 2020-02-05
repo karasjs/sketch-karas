@@ -4,8 +4,15 @@ import { observer, inject } from 'mobx-react';
 import global from '../store/global';
 import layer from '../store/layer';
 
-document.body.addEventListener('click', () => {
-  layer.clearSelectEmpty();
+document.body.addEventListener('click', e => {
+  // 添加关键帧不取消显示空白定位帧，点击定位本身也是
+  if(e.target && e.target.classList) {
+    if(e.target.classList.contains('kf') || e.target.classList.contains('empty')) {
+      return;
+    }
+  }
+  layer.clearshowEmpty();
+  layer.save();
 });
 
 @observer
@@ -15,13 +22,11 @@ class TimeLineItem extends React.Component {
     // 点击到空白处即根元素，显示出定位帧以便添加
     if(e.target === this.el) {
       e.preventDefault();
-      e.stopPropagation();
-      layer.clearSelectEmpty();
-      let per = 1000 / global.fps;
+      layer.clearshowEmpty();
       let ox = this.el.getBoundingClientRect().left;
       let x = e.pageX;
-      data.selectEmptyTime = Math.floor((x - ox) / 10) * per;
-      data.selectEmpty = true;
+      data.emptyTime = Math.floor((x - ox) / 10) * global.spf;
+      data.showEmpty = true;
     }
     if(!data.active) {
       layer.clearActive();
@@ -31,13 +36,12 @@ class TimeLineItem extends React.Component {
   }
 
   render() {
-    let { times, selectEmpty, selectEmptyTime, data } = this.props.data;
+    let { times, showEmpty, emptyTime, data } = this.props.data;
     let keyFrames = [];
-    let per = 1000 / global.fps;
     for(let i = 0, len = times.length; i < len - 1; i++) {
       let item = times[i];
-      let index = Math.floor(item / per);
-      let next = Math.floor(times[i + 1] / per);
+      let index = Math.floor(item / global.spf);
+      let next = Math.floor(times[i + 1] / global.spf);
       keyFrames.push({
         index,
         length: next - index,
@@ -55,8 +59,8 @@ class TimeLineItem extends React.Component {
       <div className="frame-last" style={{
         left: times[times.length - 1] * 10,
       }}/>
-      {selectEmpty && <div class="empty" style={{
-        left: Math.round(selectEmptyTime * 10 / per),
+      {showEmpty && <div class="empty" style={{
+        left: Math.round(emptyTime * 10 / global.spf),
       }}/>}
     </div>;
   }

@@ -71,7 +71,7 @@ class LibraryItem extends React.Component {
 
   render() {
     let { name, id, current } = this.props.data;
-    return <div class={`library-item ${current && 'current'}`}
+    return <div class={`library-item ${current ? 'current' : ''}`}
                 title={id}
                 onClick={() => this.click()}>
       <div class="icon" onMouseDown={e => this.down(e)}/>

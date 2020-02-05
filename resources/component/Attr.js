@@ -8,7 +8,7 @@ class Attr extends React.Component {
     let { enable, x, y, deg, w, h } = this.props.attr;
     return <div class="attr">
       <h3>属性</h3>
-      <div class={`list ${enable && 'enable'}`}>
+      <div class={`list ${enable ? 'enable' : ''}`}>
         <div class="item">
           <input type="number" defaultValue={x} readOnly={!enable}/>
           <span>X</span>

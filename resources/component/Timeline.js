@@ -77,8 +77,7 @@ document.body.addEventListener('mousemove', e => {
   if(isDrag) {
     if(e.pageX > ox) {
       // 先算一格多长时间
-      let per = 1000 / global.fps;
-      timeline.setCurrentTime(Math.floor((e.pageX - ox) / 10) * per);
+      timeline.setCurrentTime(Math.floor((e.pageX - ox) / 10) * global.spf);
     }
     else {
       timeline.currentTime = 0;
@@ -109,24 +108,32 @@ class Timeline extends React.Component {
     e.preventDefault();
     isDrag = false;
     ox = this.el.getBoundingClientRect().left;
-    let per = 1000 / global.fps;
-    timeline.setCurrentTime(Math.floor((e.pageX - ox) / 10) * per);
+    timeline.setCurrentTime(Math.floor((e.pageX - ox) / 10) * global.spf);
+  }
+
+  clickKf(e) {
+    e.preventDefault();
+    let { list } = this.props.layer;
+    for(let i = 0, len = list.length; i < len; i++) {
+      let item = list[i];
+      if(item.showEmpty) {}
+    }
   }
 
   render() {
     let { currentTime, currentFrame, maxFrame } = this.props.timeline;
     let { fps } = this.props.global;
-    let { list } = this.props.layer;
+    let { list, showKf } = this.props.layer;
     return <div class="timeline">
       <div class="data">
         <div class="num">
-          <span>{formatTime(currentTime)}</span>
+          <span>{formatTime(currentTime * 1000)}</span>
           <span> / </span>
           <span>{currentFrame}</span>
         </div>
         <div class="layer">
           {
-            list.reverse().map(item => <LayerItem data={item} key={item.data.uuid}/>)
+            list.slice(0).reverse().map(item => <LayerItem data={item} key={item.data.uuid}/>)
           }
         </div>
         <div class="fn">
@@ -137,7 +144,7 @@ class Timeline extends React.Component {
       <div class="panel">
         <ul class="btn">
           <li class="bezier"/>
-          <li class="kf"/>
+          <li class={`kf ${showKf ? 'enable' : ''}`} onClick={e => this.clickKf(e)}/>
           <li class="start"/>
           <li class="play"/>
           <li class="end"/>
@@ -151,9 +158,9 @@ class Timeline extends React.Component {
               })
             }
           </ul>
-          <div class="layer">
+          <div class="layer" onMouseDown={e => e.preventDefault()}>
             {
-              list.reverse().map(item => <TimeLineItem data={item} key={item.data.uuid}/>)
+              list.slice(0).reverse().map(item => <TimeLineItem data={item} key={item.data.uuid}/>)
             }
           </div>
           <div class="time-num">

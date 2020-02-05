@@ -1,4 +1,4 @@
-import { action, observable } from 'mobx';
+import { action, observable, computed } from 'mobx';
 
 import timeline from './timeline';
 import message from '../message';
@@ -19,14 +19,14 @@ class Layer {
     // 每层限制只允许一个元素出现，激活最新层
     list.forEach(item => {
       item.active = false; // 激活选择当前图层
-      item.selectEmpty = false; // 选中当前图层空白帧
-      item.selectEmptyTime = 0;
+      item.showEmpty = false; // 选中当前图层空白帧
+      item.emptyTime = 0;
     });
     list.push({
       times: [timeline.currentTime],
       active: true,
-      selectEmpty: false,
-      selectEmptyTime: 0,
+      showEmpty: false,
+      emptyTime: 0,
       data,
       name: `图层${this.count++}`,
     });
@@ -46,11 +46,20 @@ class Layer {
     }
     this.save();
   }
-  @action clearSelectEmpty() {
+  @action clearshowEmpty() {
     this.list.forEach(item => {
-      item.selectEmpty = false;
-      item.selectEmptyTime = 0;
+      item.showEmpty = false;
+      item.emptyTime = 0;
     });
+  }
+  @computed get showKf() {
+    let { list } = this;
+    for(let i = 0, len = list.length; i < len; i++) {
+      if(list[i].showEmpty) {
+        return true;
+      }
+    }
+    return false;
   }
   save() {
     message.updateLayer({

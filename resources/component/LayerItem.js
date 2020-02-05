@@ -29,10 +29,10 @@ class LayerItem extends React.Component {
   render() {
     let { data } = this.props;
     let { lock, spread, active, name, data: { uuid } } = data;
-    return <div class={`layer-item ${active && 'active'}`} onClick={() => this.click()}>
-      <div class={`lock ${lock && 'ing'}`} onClick={e => this.lock(e)}/>
+    return <div class={`layer-item ${active ? 'active' : ''}`} onClick={() => this.click()}>
+      <div class={`lock ${lock ? 'ing' : ''}`} onClick={e => this.lock(e)}/>
       <div class="name" title={uuid}>{name}</div>
-      <div class={`spread ${spread && 'ing'}`} onClick={e => this.spread(e)}/>
+      <div class={`spread ${spread ? 'ing' : ''}`} onClick={e => this.spread(e)}/>
     </div>;
   }
 }
