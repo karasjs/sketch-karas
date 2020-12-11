@@ -1,9 +1,9 @@
 # sketch-karas
-A sketch plugin for graphics programming IDE.
+A sketch plugin for karas.
 
 ## reference
 * Sketch api: https://developer.sketchapp.com/reference/api
-* Sketch plugin: https://developer.sketchapp.com/guides
+* Sketch guides: https://developer.sketchapp.com/guides
 * Sketch headers: https://github.com/abynim/Sketch-Headers
 
 ## 开发说明

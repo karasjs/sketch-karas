@@ -4,42 +4,23 @@
   "icon": "icon.png",
   "commands": [
     {
-      "name": "打开动画窗口",
-      "identifier": "animation",
-      "script": "./animation.js",
-      "handlers": {
-        "run": "onRun",
-        "actions": {
-          "Shutdown": "onShutdown"
-        }
-      }
+      "name": "Show Toolbar",
+      "identifier": "toolbar",
+      "script": "toolbar.js",
+      "handler": "onRunToolBar"
     },
     {
-      "name": "添加元素到库",
-      "identifier": "add2Library",
-      "script": "./add2Library.js",
-      "handler": "add2Library"
-    },
-    {
-      "name": "清空库",
-      "identifier": "clearLibrary",
-      "script": "./clearLibrary.js",
-      "handler": "clearLibrary"
-    },
-    {
-      "name": "清空图层",
-      "identifier": "clearLayer",
-      "script": "./clearLayer.js",
-      "handler": "clearLayer"
+      "name": "Convert",
+      "identifier": "convert",
+      "script": "convert.js"
     }
   ],
   "menu": {
     "title": "sketch-karas",
     "items": [
-      "animation",
-      "add2Library",
-      "clearLibrary",
-      "clearLayer"
+      "toolbar",
+      "-",
+      "convert"
     ]
   }
 }

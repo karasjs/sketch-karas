@@ -1,76 +1,48 @@
-import sketch from 'sketch/dom';
-import type from './type';
-import util from './util';
+import { Document } from 'sketch/dom';
+import UI from 'sketch/ui';
+import parse from './parse';
 
 function parseNormal(json) {
   let style = json.style;
   let res = {
-    style: {
-      opacity: style.opacity,
+    karasData: {
+      style: {
+        opacity: style.opacity,
+      },
     },
   };
-  ['type', 'id', 'name', 'hidden'].forEach(k => {
+  ['type', 'id', 'name'].forEach(k => {
     res[k] = json[k];
   });
   // ['x', 'y'].forEach(k => {
   //   res.style[k === 'x' ? 'left' : 'top'] = json.frame[k];
   // });
   ['width', 'height'].forEach(k => {
-    res.style[k] = json.frame[k];
+    res.karasData.style[k] = json.frame[k];
   });
   // TODO: transform/style
   return res;
 }
 
-function parseShapePath(data, json) {
-  data.tagName = '$polygon';
-  let { points, style: { fills, borders } } = json;
-  // 点和控制点
-  let pts = [];
-  let cts = [];
-  points.forEach(item => {
-    let { pointType, point } = item;
-    if(pointType === 'Straight') {
-      pts.push([point.x, point.y]);
-    }
+export default function() {
+  let document = Document.getSelectedDocument();
+  let selection = document.selectedLayers;
+  if(!selection || selection.isEmpty) {
+    UI.message('⚠️至少要选择一个图层！');
+    return;
+  }
+  let res = selection.layers.map(layer => {
+    return parse(layer);
   });
-  data.points = pts;
-  data.controls = cts;
-  // 描绘属性，取第一个可用的，无法多个并存
-  if(fills && fills.length) {
-    for(let i = 0; i < fills.length; i++) {
-      let fill = fills[i];
-      if(!fill.enabled) {
-        continue;
-      }
-      if(fill.fillType === 'Color') {
-        data.style.fill = util.int2rgba(util.rgba2int(fill.color));
-      }
-      break;
-    }
+  // 存入粘贴板
+  let pasteboard = NSPasteboard.generalPasteboard();
+  pasteboard.clearContents();
+  if(res.length > 1) {
+    pasteboard.setString_forType(JSON.stringify(res), NSPasteboardTypeString);
   }
-  if(borders && borders.length) {
-    for(let i = 0; i < borders.length; i++) {
-      let border = borders[i];
-      if(!border.enabled) {
-        continue;
-      }
-      if(border.fillType === 'Color') {
-        data.style.stroke = util.int2rgba(util.rgba2int(border.color));
-      }
-      data.style.strokeWidth = border.thickness || 1;
-      break;
-    }
+  else {
+    pasteboard.setString_forType(JSON.stringify(res[0]), NSPasteboardTypeString);
   }
-  return data;
-}
-
-export default function(layer) {
-  let json = sketch.fromNative(layer);
-  // console.log(JSON.stringify(json));
-  let data = parseNormal(json);
-  if(data.type === type.SHAPE_PATH) {
-    parseShapePath(data, json);
-  }
-  return data;
+  UI.message('🌈转换成功，数据已存入粘贴板！');
+  return res;
 }

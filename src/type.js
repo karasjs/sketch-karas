@@ -1,5 +1,3 @@
-'use strict';
-
 export default {
   GROUP: 'Group',
   IMAGE: 'Image',
@@ -10,4 +8,6 @@ export default {
   PAGE: 'Page',
   SYMBOL_INSTANCE: 'SymbolInstance',
   SYMBOL_MASTER: 'SymbolMaster',
+  SLICE: 'Slice',
+  HOT_SPOT: 'HotSpot',
 };

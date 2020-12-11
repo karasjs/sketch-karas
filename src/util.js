@@ -1,45 +1,72 @@
-'use strict';
+import karas from 'karas';
 
-import type from './type';
+const { int2rgba, rgba2int } = karas.util;
 
 export default {
-  getTop(layer) {
-    if(!layer) {
-      return null;
+  getFillStyle(fills) {
+    if(!fills || !fills.length) {
+      return;
     }
-    do {
-      if(layer.type === type.ARTBOARD) {
-        return layer;
+    for(let i = 0; i < fills.length; i++) {
+      let fill = fills[i];
+      if(!fill.enabled) {
+        continue;
       }
-      if(layer.type === type.PAGE) {
-        return layer;
+      if(fill.fillType === 'Color') {
+        return int2rgba(rgba2int(fill.color));
       }
-      // if(layer.type === type.GROUP) {
-      //   return layer;
-      // }
-      layer = layer.parent;
+      else if(fill.fillType === 'Gradient') {
+        let gradient = fill.gradient;
+        console.log(gradient);
+      }
     }
-    while(layer);
-    return null;
   },
-  rgba2int(s) {
-    if(!s) {
-      return [0,0,0,0];
+  getBorderStyle(borders, borderOptions) {
+    if(!borders || !borders.length) {
+      return;
     }
-    if(s.charAt(0) === '#') {
-      let res = [];
-      for(let i = 1; i < 8; i += 2) {
-        let c = s.slice(i, i + 2);
-        res.push(parseInt(c, 16));
+    for(let i = 0; i < borders.length; i++) {
+      let border = borders[i];
+      if(!border.enabled || border.thickness <= 0) {
+        continue;
       }
-      return res;
+      if(border.fillType === 'Color') {
+        let res = {
+          width: border.thickness,
+        };
+        res.color = int2rgba(rgba2int(border.color));
+        if(borderOptions.dashePattern && borderOptions.dashePattern.length) {
+          res.strokeDasharray = borderOptions.dashePattern;
+        }
+        if({
+          Butt: 'butt',
+          Round: 'round',
+          Projecting: 'square',
+        }.hasOwnProperty(borderOptions.lineEnd)) {
+          res.strokeLinecap = borderOptions.lineEnd;
+        }
+        return res;
+      }
+      else if(border.fillType === 'Gradient') {
+        let gradient = border.gradient;
+        console.log(gradient);
+      }
     }
-    return [0,0,0,0];
   },
-  int2rgba(arr) {
-    if(arr.length === 3) {
-      arr.push(1);
+  getImageFormat(exportFormats) {
+    let imageFormat = 'png';
+    if(exportFormats && exportFormats.length) {
+      exportFormats.some(exportFormat => {
+        if(exportFormat && exportFormat.fileFormat) {
+          imageFormat = exportFormat.fileFormat;
+          return true;
+        }
+        return false;
+      });
     }
-    return `rgba(${arr.join(',')})`;
-  }
+    return imageFormat;
+  },
+  base64SrcEncodedFromNsData(nsdata, imageFormat) {
+    return `data:image/${imageFormat};base64,${nsdata.base64EncodedStringWithOptions(0)}`;
+  },
 };
