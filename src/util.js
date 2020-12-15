@@ -1,9 +1,10 @@
 import karas from 'karas';
 
 const { int2rgba, rgba2int } = karas.util;
+const { math: { geom: { r2d } } } = karas;
 
 export default {
-  getFillStyle(fills) {
+  getFillStyle(fills, json) {
     if(!fills || !fills.length) {
       return;
     }
@@ -16,8 +17,40 @@ export default {
         return int2rgba(rgba2int(fill.color));
       }
       else if(fill.fillType === 'Gradient') {
-        let gradient = fill.gradient;
-        console.log(gradient);
+        let { width, height } = json.frame;
+        let { from, to, gradientType, stops } = fill.gradient;
+        console.log(fill.gradient);
+        if(gradientType === 'Linear') {
+          let deg;
+          // 朝左下
+          if(to.y >= from.y && to.x < from.x) {
+            deg = Math.atan(Math.abs(to.y * height - from.y * height) / Math.abs(to.x * width - from.x * width));
+            deg = r2d(deg);
+            deg += 90;
+            deg = -deg;
+          }
+          // 右下
+          else if(to.y >= from.y && to.x >= from.x) {
+            deg = Math.atan(Math.abs(to.y * height - from.y * height) / Math.abs(to.x * width - from.x * width));
+            deg = r2d(deg);
+            deg += 90;
+          }
+          // 左上
+          else if(to.y < from.y && to.x < from.x) {
+            deg = Math.atan(Math.abs(to.x * width - from.x * width) / Math.abs(to.y * height - from.y * height));
+            deg = r2d(deg);
+            deg = -deg;
+          }
+          // 右上
+          else if(to.y < from.y && to.x >= from.x) {
+            deg = Math.atan(Math.abs(to.x * width - from.x * width) / Math.abs(to.y * height - from.y * height));
+            deg = r2d(deg);
+          }
+          let s = `linear-gradient(${deg}`;
+          s += ')';
+          return s;
+        }
+        else if(gradientType === 'Radial') {}
       }
     }
   },

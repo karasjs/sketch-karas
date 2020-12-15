@@ -67,7 +67,7 @@ function parseNormal(data, json, layer, isChildren) {
   return data;
 }
 
-function parseShapePath(data, json, layer) {console.log(json)
+function parseShapePath(data, json, layer) {
   data.tagName = '$polygon';
   let { points, style: { fills, borders, borderOptions } } = json;
   // 点和控制点
@@ -102,7 +102,7 @@ function parseShapePath(data, json, layer) {console.log(json)
   }
   // 描绘属性，取第一个可用的，无法多个并存
   if(fills && fills.length) {
-    let fill = util.getFillStyle(fills);
+    let fill = util.getFillStyle(fills, json);
     if(fill) {
       data.props.style.fill = fill;
     }
