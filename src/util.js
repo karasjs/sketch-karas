@@ -1,7 +1,4 @@
-import karas from 'karas';
-
-const { int2rgba, rgba2int } = karas.util;
-const { math: { geom: { r2d } } } = karas;
+import message from './message';
 
 export default {
   getFillStyle(fills, json) {
@@ -16,7 +13,7 @@ export default {
       if(fill.fillType === 'Color') {
         return fill.color;
       }
-      else if(fill.fillType === 'Gradient') {
+      else if(fill.fillType === 'Gradient') { console.log(fill);
         let { from, to, aspectRatio, gradientType, stops } = fill.gradient;
         if(gradientType === 'Linear') {
           let s = `radialGradient(${from.x} ${from.y} ${to.x} ${to.y}`;
@@ -59,6 +56,9 @@ export default {
           s += ')';
           return s;
         }
+      }
+      else {
+        message.content = '⚠️暂不支持图案填充⚠️';
       }
     }
   },
