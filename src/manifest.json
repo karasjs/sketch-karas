@@ -13,6 +13,16 @@
       "name": "Convert",
       "identifier": "convert",
       "script": "convert.js"
+    },
+    {
+      "name": "Link",
+      "identifier": "link",
+      "script": "link.js"
+    },
+    {
+      "name": "About",
+      "identifier": "about",
+      "script": "about.js"
     }
   ],
   "menu": {
@@ -20,7 +30,9 @@
     "items": [
       "toolbar",
       "-",
-      "convert"
+      "convert",
+      "link",
+      "about"
     ]
   }
 }

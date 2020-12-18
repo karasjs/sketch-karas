@@ -1,4 +1,6 @@
 import convert from './convert';
+import link from './link';
+import about from './about';
 
 export function onRunToolBar(context) {
   let pluginSketch = context.plugin.url().URLByAppendingPathComponent('Contents').URLByAppendingPathComponent('Resources');
@@ -35,7 +37,7 @@ export function onRunToolBar(context) {
   toolbar.setBackgroundColor(NSColor.colorWithRed_green_blue_alpha(1, 1, 1, 1));
   toolbar.setTitleVisibility(NSWindowTitleHidden);
   toolbar.setTitlebarAppearsTransparent(true);
-  toolbar.setFrame_display(NSMakeRect(100, 200, 120, 78), false);
+  toolbar.setFrame_display(NSMakeRect(100, 200, 162, 78), false);
   toolbar.becomeKeyWindow();
   toolbar.setLevel(NSFloatingWindowLevel);
 
@@ -44,7 +46,7 @@ export function onRunToolBar(context) {
   let iconView = addImage(NSMakeRect(10, 57, 16, 16), 'icon');
   contentView.addSubview(iconView);
 
-  let lineView = addImage(NSMakeRect(8, 52, 104, 1), 'line');
+  let lineView = addImage(NSMakeRect(8, 52, 162, 1), 'line');
   contentView.addSubview(lineView);
 
   let closeBtn = addButton(NSMakeRect(10, 18, 16, 16), 'close', function() {
@@ -58,10 +60,15 @@ export function onRunToolBar(context) {
   });
   contentView.addSubview(convertBtn);
 
-  let link = addButton(NSMakeRect(78, 10, 32, 32), 'link', function() {
-    console.log(22)
+  let linkBtn = addButton(NSMakeRect(78, 10, 32, 32), 'link', function() {
+    link();
   });
-  contentView.addSubview(link);
+  contentView.addSubview(linkBtn);
+
+  let aboutBtn = addButton(NSMakeRect(120, 10, 32, 32), 'about', function() {
+    about();
+  });
+  contentView.addSubview(aboutBtn);
 
   toolbar.makeKeyAndOrderFront(nil);
 }
