@@ -7,6 +7,7 @@ https://github.com/karasjs/sketch-karas/raw/master/sketch-karas.sketchplugin.zip
 ## reference
 * Sketch api: https://developer.sketchapp.com/reference/api
 * Sketch guides: https://developer.sketchapp.com/guides
+* Sketch CocoaScript: https://developer.sketch.com/plugins/cocoascript
 * Sketch headers: https://github.com/abynim/Sketch-Headers
 
 ## 开发说明
