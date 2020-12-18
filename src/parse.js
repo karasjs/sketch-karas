@@ -1,9 +1,8 @@
 import sketch from 'sketch/dom';
-import karas from 'karas';
 import util from './util';
 import TYPE_ENUM from './type';
 
-const { isNil, int2rgba, rgba2int } = karas.util;
+const { isNil } = util;
 
 function parse(layer, json, isChildren) {
   json = json || sketch.fromNative(layer);
@@ -144,8 +143,8 @@ function parseText(data, json, layer) {
     data.props.style[k] = json.style && json.style[k];
   });
   data.props.style.fontWeight = util.appKitWeightToCSSWeight(json.style.fontWeight);
-  data.props.style.textAlign = json.style && json.style.alignment;
-  data.props.style.color = int2rgba(rgba2int(json.style && json.style.textColor));
+  data.props.style.textAlign = json.style.alignment;
+  data.props.style.color = json.style.textColor;
   // fillColor override
   let fillStyle = util.getFillStyle(json.style.fills);
   if(fillStyle && fillStyle.color) {
@@ -191,7 +190,7 @@ function parseArtboard(data, json, layer) {
     data.children.push(layerData);
   }
   if(json.background.enabled && json.background.color) {
-    data.props.style.backgroundColor = int2rgba(rgba2int(json.background.color));
+    data.props.style.backgroundColor = json.background.color;
   }
   return data;
 }

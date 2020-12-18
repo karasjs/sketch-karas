@@ -1,6 +1,70 @@
 import message from './message';
 
 export default {
+  isNil(v) {
+    return v === undefined || v === null;
+  },
+  int2rgba(color) {
+    if(Array.isArray(color)) {
+      if(color.length === 4) {
+        return 'rgba(' + color.join(',') + ')';
+      }
+      else if(color.length === 3) {
+        return 'rgba(' + color.join(',') + ',1)';
+      }
+    }
+    return color || 'rgba(0,0,0,0)';
+  },
+  rgba2int(color) {
+    if(Array.isArray(color)) {
+      return color;
+    }
+    let res = [];
+    if(!color || color === 'transparent') {
+      res = [0, 0, 0, 0];
+    }
+    else if(color.charAt(0) === '#') {
+      color = color.slice(1);
+      if(color.length === 3) {
+        res.push(parseInt(color.charAt(0) + color.charAt(0), 16));
+        res.push(parseInt(color.charAt(1) + color.charAt(1), 16));
+        res.push(parseInt(color.charAt(2) + color.charAt(2), 16));
+        res[3] = 1;
+      }
+      else if(color.length === 6) {
+        res.push(parseInt(color.slice(0, 2), 16));
+        res.push(parseInt(color.slice(2, 4), 16));
+        res.push(parseInt(color.slice(4), 16));
+        res[3] = 1;
+      }
+      else if(color.length === 8) {
+        res.push(parseInt(color.slice(0, 2), 16));
+        res.push(parseInt(color.slice(2, 4), 16));
+        res.push(parseInt(color.slice(4, 6), 16));
+        res.push(parseInt(color.slice(6), 16) / 255);
+      }
+      else {
+        res[0] = res[1] = res[2] = 0;
+        res[3] = 1;
+      }
+    }
+    else {
+      let c = color.match(/rgba?\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?\s*\)/i);
+      if(c) {
+        res = [parseInt(c[1]), parseInt(c[2]), parseInt(c[3])];
+        if(!isNil(c[4])) {
+          res[3] = parseFloat(c[4]);
+        }
+        else {
+          res[3] = 1;
+        }
+      }
+      else {
+        res = [0, 0, 0, 0];
+      }
+    }
+    return res;
+  },
   getFillStyle(fills, json) {
     if(!fills || !fills.length) {
       return;
@@ -124,5 +188,8 @@ export default {
   },
   base64SrcEncodedFromNsData(nsdata, imageFormat) {
     return `data:image/${imageFormat};base64,${nsdata.base64EncodedStringWithOptions(0)}`;
+  },
+  appKitWeightToCSSWeight(appKitWeight) {
+    return [100,100,100,200,300,400,500,500,600,700,800,900,900,900,900,900][appKitWeight] || 500;
   },
 };

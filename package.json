@@ -21,6 +21,8 @@
   },
   "scripts": {
     "build": "rm -rf sketch-karas.sketchplugin && skpm-build",
+    "zip": "rm -rf sketch-karas.sketchplugin.zip && zip -r sketch-karas.sketchplugin.zip sketch-karas.sketchplugin/",
+    "pack": "npm run build && npm run zip",
     "watch": "skpm-build --watch",
     "start": "skpm-build --watch --run",
     "postinstall": "npm run build && skpm-link",
