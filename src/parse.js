@@ -124,7 +124,6 @@ function parseShapePath(data, json, layer) {
 
 function parseImage(data, json, layer) {
   data.tagName = 'img';
-  console.log(json);
   let {
     style: { borders, borderOptions },
     exportFormats,

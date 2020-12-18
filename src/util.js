@@ -14,43 +14,51 @@ export default {
         continue;
       }
       if(fill.fillType === 'Color') {
-        return int2rgba(rgba2int(fill.color));
+        return fill.color;
       }
       else if(fill.fillType === 'Gradient') {
-        let { width, height } = json.frame;
-        let { from, to, gradientType, stops } = fill.gradient;
-        console.log(fill.gradient);
+        let { from, to, aspectRatio, gradientType, stops } = fill.gradient;
         if(gradientType === 'Linear') {
-          let deg;
-          // 朝左下
-          if(to.y >= from.y && to.x < from.x) {
-            deg = Math.atan(Math.abs(to.y * height - from.y * height) / Math.abs(to.x * width - from.x * width));
-            deg = r2d(deg);
-            deg += 90;
-            deg = -deg;
-          }
-          // 右下
-          else if(to.y >= from.y && to.x >= from.x) {
-            deg = Math.atan(Math.abs(to.y * height - from.y * height) / Math.abs(to.x * width - from.x * width));
-            deg = r2d(deg);
-            deg += 90;
-          }
-          // 左上
-          else if(to.y < from.y && to.x < from.x) {
-            deg = Math.atan(Math.abs(to.x * width - from.x * width) / Math.abs(to.y * height - from.y * height));
-            deg = r2d(deg);
-            deg = -deg;
-          }
-          // 右上
-          else if(to.y < from.y && to.x >= from.x) {
-            deg = Math.atan(Math.abs(to.x * width - from.x * width) / Math.abs(to.y * height - from.y * height));
-            deg = r2d(deg);
-          }
-          let s = `linear-gradient(${deg}`;
+          let s = `radialGradient(${from.x} ${from.y} ${to.x} ${to.y}`;
+          stops.forEach(item => {
+            s += `, ${item.color} ${item.position * 100}%`;
+          });
           s += ')';
           return s;
         }
-        else if(gradientType === 'Radial') {}
+        else if(gradientType === 'Radial') {
+          let s = `radialGradient(${from.x} ${from.y} ${to.x} ${to.y} ${aspectRatio || 1}`;
+          stops.forEach(item => {
+            s += `, ${item.color} ${item.position * 100}%`;
+          });
+          s += ')';
+          return s;
+        }
+        else if(gradientType === 'Angular') {
+          let s = `conicGradient(`;
+          stops = stops.slice(0);
+          let i = stops.length - 1;
+          if(stops[i].position < 1) {
+            stops.push({
+              position: 1,
+              color: stops[i].color,
+            });
+          }
+          if(stops[0].position > 0) {
+            stops.unshift({
+              position: 0,
+              color: stops[0].color,
+            });
+          }
+          stops.forEach((item, i) => {
+            if(i) {
+              s += ', ';
+            }
+            s += `${item.color} ${item.position * 100}%`;
+          });
+          s += ')';
+          return s;
+        }
       }
     }
   },
@@ -63,27 +71,42 @@ export default {
       if(!border.enabled || border.thickness <= 0) {
         continue;
       }
+      let res = {
+        width: border.thickness,
+      };
+      if(borderOptions.dashePattern && borderOptions.dashePattern.length) {
+        res.strokeDasharray = borderOptions.dashePattern;
+      }
+      if({
+        Butt: 'butt',
+        Round: 'round',
+        Projecting: 'square',
+      }.hasOwnProperty(borderOptions.lineEnd)) {
+        res.strokeLinecap = borderOptions.lineEnd;
+      }
       if(border.fillType === 'Color') {
-        let res = {
-          width: border.thickness,
-        };
-        res.color = int2rgba(rgba2int(border.color));
-        if(borderOptions.dashePattern && borderOptions.dashePattern.length) {
-          res.strokeDasharray = borderOptions.dashePattern;
-        }
-        if({
-          Butt: 'butt',
-          Round: 'round',
-          Projecting: 'square',
-        }.hasOwnProperty(borderOptions.lineEnd)) {
-          res.strokeLinecap = borderOptions.lineEnd;
-        }
-        return res;
+        res.color = border.color;
       }
       else if(border.fillType === 'Gradient') {
-        let gradient = border.gradient;
-        console.log(gradient);
+        let { from, to, aspectRatio, gradientType, stops } = border.gradient;
+        if(gradientType === 'Linear') {
+          let s = `radialGradient(${from.x} ${from.y} ${to.x} ${to.y}`;
+          stops.forEach(item => {
+            s += `, ${item.position * 100}% ${item.color}`;
+          });
+          s += ')';
+          res.color = s;
+        }
+        else if(gradientType === 'Radial') {
+          let s = `radialGradient(${from.x} ${from.y} ${to.x} ${to.y} ${aspectRatio || 1}`;
+          stops.forEach(item => {
+            s += `, ${item.position * 100}% ${item.color}`;
+          });
+          s += ')';
+          res.color = s;
+        }
       }
+      return res;
     }
   },
   getImageFormat(exportFormats) {
