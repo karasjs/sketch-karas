@@ -1,6 +1,9 @@
 # sketch-karas
 A sketch plugin for karas.
 
+## download
+https://github.com/karasjs/sketch-karas/raw/master/sketch-karas.sketchplugin.zip
+
 ## reference
 * Sketch api: https://developer.sketchapp.com/reference/api
 * Sketch guides: https://developer.sketchapp.com/guides
