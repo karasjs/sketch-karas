@@ -2,18 +2,21 @@ import sketch from 'sketch/dom';
 import util from './util';
 import TYPE_ENUM from './type';
 
-const { isNil } = util;
+const { isNil, hex2rgba } = util;
 
 function parse(layer, json, isChildren) {
   json = json || sketch.fromNative(layer);
   // console.log(layer);
-  // console.log(json);
+  console.log(json);
   let data = {
     tagName: '',
   };
   parseNormal(data, json, layer, isChildren);
   if(json.type === TYPE_ENUM.SHAPE_PATH) {
     parseShapePath(data, json, layer, isChildren);
+  }
+  else if(json.type === TYPE_ENUM.SHAPE) {
+    parseShape(data, json, layer, isChildren);
   }
   else if(json.type === TYPE_ENUM.IMAGE) {
     parseImage(data, json, layer, isChildren);
@@ -44,9 +47,9 @@ function parseNormal(data, json, layer, isChildren) {
   };
   // 组里的元素相对父位置
   if(isChildren) {
-    ['x', 'y'].forEach(k => {
-      data.props.style[k] = json.frame[k];
-    });
+    // sketch 为 x / y, karas 为 left / top
+    data.props.style.left = json.frame.x;
+    data.props.style.top = json.frame.y;
   }
   ['width', 'height'].forEach(k => {
     data.props.style[k] = json.frame[k];
@@ -66,6 +69,23 @@ function parseNormal(data, json, layer, isChildren) {
   return data;
 }
 
+function parseShape(data, json, layer) {
+  data.tagName = 'div';
+  console.log(json, '====shape')
+  data.children = [];
+  let document = sketch.getSelectedDocument();
+  // 递归每一层的layer
+  for(let i = 0; i < json.layers.length; i++) {
+    let layerJson = json.layers[i];
+    let layer = document.getLayerWithID(layerJson.id);
+    let layerData = parse(layer, layerJson, true);
+    data.children.push(layerData);
+  }
+  return data;
+}
+
+
+
 function parseShapePath(data, json, layer) {
   data.tagName = '$polygon';
   let { points, style: { fills, borders, borderOptions } } = json;
@@ -74,7 +94,9 @@ function parseShapePath(data, json, layer) {
   let cts = [];
   // 是否都是直线
   let hasControl;
-  points.forEach((item, index) => {
+
+  // console.log('---------', json);
+  (points || []).forEach((item, index) => {
     let { point, curveFrom, pointType } = item;
     let nextPoint = index === points.length - 1 ? points[0] : points[index + 1];
     let { curveTo, pointType: nextPointType } = nextPoint;
@@ -106,11 +128,14 @@ function parseShapePath(data, json, layer) {
       data.props.style.fill = fill;
     }
   }
+
+  // TODO: 为啥要初始化 transparent
+  data.props.style.stroke = 'transparent';
   if(borders && borders.length) {
     let borderStyle = util.getBorderStyle(borders, borderOptions);
     if(borderStyle) {
       data.props.style.strokeWidth = borderStyle.width;
-      data.props.style.stroke = borderStyle.color;
+      data.props.style.stroke = hex2rgba(borderStyle.color);
       data.props.style.strokeDasharray = borderStyle.strokeDasharray;
       data.props.style.strokeLinecap = borderStyle.strokeLinecap;
     }
@@ -118,6 +143,7 @@ function parseShapePath(data, json, layer) {
   else {
     data.props.strokeWidth = 0;
   }
+  console.log(data)
   return data;
 }
 
@@ -144,11 +170,11 @@ function parseText(data, json, layer) {
   });
   data.props.style.fontWeight = util.appKitWeightToCSSWeight(json.style.fontWeight);
   data.props.style.textAlign = json.style.alignment;
-  data.props.style.color = json.style.textColor;
+  data.props.style.color = hex2rgba(json.style.textColor);
   // fillColor override
   let fillStyle = util.getFillStyle(json.style.fills);
   if(fillStyle && fillStyle.color) {
-    data.props.style.color = fillStyle.color;
+    data.props.style.color = hex2rgba(fillStyle.color);
   }
   // 0 - variable width (fixed height)
   // 1 - variable height (fixed width)
