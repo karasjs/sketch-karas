@@ -2,18 +2,19 @@ import sketch from 'sketch/dom';
 import util from './util';
 import TYPE_ENUM from './type';
 
-const { isNil } = util;
+const { isNil, hex2rgba } = util;
 
 function parse(layer, json, isChildren) {
   json = json || sketch.fromNative(layer);
-  // console.log(layer);
-  // console.log(json);
   let data = {
     tagName: '',
   };
   parseNormal(data, json, layer, isChildren);
   if(json.type === TYPE_ENUM.SHAPE_PATH) {
     parseShapePath(data, json, layer, isChildren);
+  }
+  else if(json.type === TYPE_ENUM.SHAPE) {
+    parseShape(data, json, layer, isChildren);
   }
   else if(json.type === TYPE_ENUM.IMAGE) {
     parseImage(data, json, layer, isChildren);
@@ -34,7 +35,7 @@ function parse(layer, json, isChildren) {
 }
 
 function parseNormal(data, json, layer, isChildren) {
-  let { style, transform } = json;
+  let { style = {}, transform } = json;
   ['id', 'name'].forEach(k => {
     data[k] = json[k];
   });
@@ -44,9 +45,9 @@ function parseNormal(data, json, layer, isChildren) {
   };
   // 组里的元素相对父位置
   if(isChildren) {
-    ['x', 'y'].forEach(k => {
-      data.props.style[k] = json.frame[k];
-    });
+    // sketch 为 x / y, karas 为 left / top
+    data.props.style.left = json.frame.x;
+    data.props.style.top = json.frame.y;
   }
   ['width', 'height'].forEach(k => {
     data.props.style[k] = json.frame[k];
@@ -66,39 +67,80 @@ function parseNormal(data, json, layer, isChildren) {
   return data;
 }
 
+function parseShape(data, json, layer) {
+  data.tagName = 'div';
+  data.children = [];
+  let document = sketch.getSelectedDocument();
+  // 递归每一层的layer
+  for(let i = 0; i < json.layers.length; i++) {
+    let layerJson = json.layers[i];
+    let layer = document.getLayerWithID(layerJson.id);
+    let layerData = parse(layer, layerJson, true);
+    data.children.push(layerData);
+  }
+  return data;
+}
+
+
+
 function parseShapePath(data, json, layer) {
   data.tagName = '$polygon';
-  let { points, style: { fills, borders, borderOptions } } = json;
+  let { points,frame: {width, height}, style: { fills, borders, borderOptions } } = json;
   // 点和控制点
   let pts = [];
   let cts = [];
   // 是否都是直线
   let hasControl;
-  points.forEach((item, index) => {
-    let { point, curveFrom, pointType } = item;
+
+  (points || []).forEach((item, index) => {
+    let { point, curveFrom, pointType, cornerRadius } = item;
     let nextPoint = index === points.length - 1 ? points[0] : points[index + 1];
+    let lastPoint = index === 0 ? points[points.length - 1] : points[index - 1];
     let { curveTo, pointType: nextPointType } = nextPoint;
-    pts.push([point.x, point.y]);
-    if(!json.closed && index === points.length - 1) {
-      // polyline
-      return;
-    }
-    // sketch导出的curveFrom和curveTo有问题，如果是straight，应该直接是point
-    if(nextPointType === 'Straight') {
-      curveTo = nextPoint.point;
-    }
-    if(pointType === 'Straight' && nextPointType === 'Straight') {
-      cts.push(null);
-    }
-    else {
-      cts.push([curveFrom.x, curveFrom.y, curveTo.x, curveTo.y]);
+
+    if (pointType === 'Straight' && cornerRadius > 0) {
+      const P0 = [lastPoint.point.x * width, lastPoint.point.y * height];
+      const P1 = [point.x * width, point.y * height];
+      const P2 = [nextPoint.point.x * width, nextPoint.point.y * height];
+      const {
+        M1,
+        C1,
+        C2,
+        C3,
+      } = util.getBezierpts(P0, P1, P2, cornerRadius);
+
+      pts.push([M1[0] / width, M1[1] / height]);
+      pts.push([C3[0] / width, C3[1] / height]);
+      cts.push([C1[0] / width, C1[1] / height, C2[0] / width, C2[1] / height], []);
       hasControl = true;
+    } 
+    else {
+      
+      pts.push([point.x, point.y]);
+      if(!json.closed && index === points.length - 1) {
+        return;
+      }
+
+      // sketch导出的curveFrom和curveTo有问题，如果是straight，应该直接是point
+      if(nextPointType === 'Straight') {
+        curveTo = nextPoint.point;
+      }
+      if (pointType === 'Straight' && nextPointType === 'Straight') {
+        cts.push(null);
+      }
+      else {
+        cts.push([curveFrom.x, curveFrom.y, curveTo.x, curveTo.y]);
+        hasControl = true;
+      }
     }
+    data.props.points = pts;
+    if(hasControl) {
+      data.props.controls = cts;
+    }
+
   });
-  data.props.points = pts;
-  if(hasControl) {
-    data.props.controls = cts;
-  }
+
+
   // 描绘属性，取第一个可用的，无法多个并存
   if(fills && fills.length) {
     let fill = util.getFillStyle(fills, json);
@@ -106,17 +148,20 @@ function parseShapePath(data, json, layer) {
       data.props.style.fill = fill;
     }
   }
+
   if(borders && borders.length) {
     let borderStyle = util.getBorderStyle(borders, borderOptions);
     if(borderStyle) {
       data.props.style.strokeWidth = borderStyle.width;
-      data.props.style.stroke = borderStyle.color;
+      data.props.style.stroke = hex2rgba(borderStyle.color);
       data.props.style.strokeDasharray = borderStyle.strokeDasharray;
       data.props.style.strokeLinecap = borderStyle.strokeLinecap;
+    } else {
+      data.props.style.strokeWidth = 0;
     }
   }
   else {
-    data.props.strokeWidth = 0;
+    data.props.style.strokeWidth = 0;
   }
   return data;
 }
@@ -144,11 +189,11 @@ function parseText(data, json, layer) {
   });
   data.props.style.fontWeight = util.appKitWeightToCSSWeight(json.style.fontWeight);
   data.props.style.textAlign = json.style.alignment;
-  data.props.style.color = json.style.textColor;
+  data.props.style.color = hex2rgba(json.style.textColor);
   // fillColor override
   let fillStyle = util.getFillStyle(json.style.fills);
   if(fillStyle && fillStyle.color) {
-    data.props.style.color = fillStyle.color;
+    data.props.style.color = hex2rgba(fillStyle.color);
   }
   // 0 - variable width (fixed height)
   // 1 - variable height (fixed width)
