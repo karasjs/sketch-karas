@@ -204,6 +204,53 @@ function appKitWeightToCSSWeight(appKitWeight) {
   return [100,100,100,200,300,400,500,500,600,700,800,900,900,900,900,900][appKitWeight] || 500;
 }
 
+// P0, P1, P2 => M1, C1, C2, C3
+function getBezierpts(P0, P1, P2, R) {
+// function getBezierpts() {
+//   const P0 = [0,100];
+//   const P1 = [100, 100];
+//   const P2 = [100 ,0];
+//   const R = 50;
+
+  let M1 = [];
+  let C1 = [];
+  let C2 = [];
+  let C3 = [];
+
+  const Lp0p1 = Math.sqrt((P0[1] - P1[1]) * (P0[1] - P1[1]) + (P0[0] - P1[0]) * (P0[0] - P1[0]));
+  const Lp1p2 = Math.sqrt((P1[1] - P2[1]) * (P1[1] - P2[1]) + (P1[0] - P2[0]) * (P1[0] - P2[0]));
+  const Lp2p0 = Math.sqrt((P0[1] - P2[1]) * (P0[1] - P2[1]) + (P0[0] - P2[0]) * (P0[0] - P2[0]));
+
+  const angle = Math.acos((Lp0p1 * Lp0p1 + Lp1p2 * Lp1p2 - Lp2p0 * Lp2p0) / (2 * Lp0p1 * Lp1p2));
+  
+  const Lp1m1 = R / Math.tan(angle/2);
+
+  const Lp1c1 = Lp1m1 - 4 / 3 * R * Math.tan(Math.PI / 4 - angle / 4);
+  const Lp1c2 = Lp1c1;
+  const Lp1c3 = Lp1m1;
+
+  const Rp1m1Top0p1 = Lp1m1 / Lp0p1;
+  const Rp1m2Top0p1 = Lp1c1 / Lp0p1;
+  const Rp1m3Top1p2 = Lp1c2 / Lp1p2;;
+  const Rp1c3Top1p2 = Lp1c3 / Lp1p2;
+
+  M1[0] = P1[0] - (P1[0] - P0[0]) * Rp1m1Top0p1;
+  M1[1] = P1[1] - (P1[1] - P0[1]) * Rp1m1Top0p1;
+  C1[0] = P1[0] - (P1[0] - P0[0]) * Rp1m2Top0p1;
+  C1[1] = P1[1] - (P1[1] - P0[1]) * Rp1m2Top0p1;
+  C2[0] = P1[0] - (P1[0] - P2[0]) * Rp1m3Top1p2;
+  C2[1] = P1[1] - (P1[1] - P2[1]) * Rp1m3Top1p2;
+  C3[0] = P1[0] - (P1[0] - P2[0]) * Rp1c3Top1p2;
+  C3[1] = P1[1] - (P1[1] - P2[1]) * Rp1c3Top1p2;
+
+  return {
+    M1,
+    C1,
+    C2,
+    C3,
+  };
+}
+
 export default {
   hex2rgba,
   isNil,
@@ -214,4 +261,5 @@ export default {
   getImageFormat,
   base64SrcEncodedFromNsData,
   appKitWeightToCSSWeight,
+  getBezierpts,
 }

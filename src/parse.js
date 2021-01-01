@@ -6,8 +6,6 @@ const { isNil, hex2rgba } = util;
 
 function parse(layer, json, isChildren) {
   json = json || sketch.fromNative(layer);
-  // console.log(layer);
-  console.log(json);
   let data = {
     tagName: '',
   };
@@ -37,7 +35,7 @@ function parse(layer, json, isChildren) {
 }
 
 function parseNormal(data, json, layer, isChildren) {
-  let { style, transform } = json;
+  let { style = {}, transform } = json;
   ['id', 'name'].forEach(k => {
     data[k] = json[k];
   });
@@ -71,7 +69,6 @@ function parseNormal(data, json, layer, isChildren) {
 
 function parseShape(data, json, layer) {
   data.tagName = 'div';
-  console.log(json, '====shape')
   data.children = [];
   let document = sketch.getSelectedDocument();
   // 递归每一层的layer
@@ -88,39 +85,62 @@ function parseShape(data, json, layer) {
 
 function parseShapePath(data, json, layer) {
   data.tagName = '$polygon';
-  let { points, style: { fills, borders, borderOptions } } = json;
+  let { points,frame: {width, height}, style: { fills, borders, borderOptions } } = json;
   // 点和控制点
   let pts = [];
   let cts = [];
   // 是否都是直线
   let hasControl;
 
-  // console.log('---------', json);
   (points || []).forEach((item, index) => {
-    let { point, curveFrom, pointType } = item;
+    let { point, curveFrom, pointType, cornerRadius } = item;
     let nextPoint = index === points.length - 1 ? points[0] : points[index + 1];
+    let lastPoint = index === 0 ? points[points.length - 1] : points[index - 1];
     let { curveTo, pointType: nextPointType } = nextPoint;
-    pts.push([point.x, point.y]);
-    if(!json.closed && index === points.length - 1) {
-      // polyline
-      return;
-    }
-    // sketch导出的curveFrom和curveTo有问题，如果是straight，应该直接是point
-    if(nextPointType === 'Straight') {
-      curveTo = nextPoint.point;
-    }
-    if(pointType === 'Straight' && nextPointType === 'Straight') {
-      cts.push(null);
-    }
-    else {
-      cts.push([curveFrom.x, curveFrom.y, curveTo.x, curveTo.y]);
+
+    if (pointType === 'Straight' && cornerRadius > 0) {
+      const P0 = [lastPoint.point.x * width, lastPoint.point.y * height];
+      const P1 = [point.x * width, point.y * height];
+      const P2 = [nextPoint.point.x * width, nextPoint.point.y * height];
+      const {
+        M1,
+        C1,
+        C2,
+        C3,
+      } = util.getBezierpts(P0, P1, P2, cornerRadius);
+
+      pts.push([M1[0] / width, M1[1] / height]);
+      pts.push([C3[0] / width, C3[1] / height]);
+      cts.push([C1[0] / width, C1[1] / height, C2[0] / width, C2[1] / height], []);
       hasControl = true;
+    } 
+    else {
+      
+      pts.push([point.x, point.y]);
+      if(!json.closed && index === points.length - 1) {
+        return;
+      }
+
+      // sketch导出的curveFrom和curveTo有问题，如果是straight，应该直接是point
+      if(nextPointType === 'Straight') {
+        curveTo = nextPoint.point;
+      }
+      if (pointType === 'Straight' && nextPointType === 'Straight') {
+        cts.push(null);
+      }
+      else {
+        cts.push([curveFrom.x, curveFrom.y, curveTo.x, curveTo.y]);
+        hasControl = true;
+      }
     }
+    data.props.points = pts;
+    if(hasControl) {
+      data.props.controls = cts;
+    }
+
   });
-  data.props.points = pts;
-  if(hasControl) {
-    data.props.controls = cts;
-  }
+
+
   // 描绘属性，取第一个可用的，无法多个并存
   if(fills && fills.length) {
     let fill = util.getFillStyle(fills, json);
@@ -129,8 +149,6 @@ function parseShapePath(data, json, layer) {
     }
   }
 
-  // TODO: 为啥要初始化 transparent
-  data.props.style.stroke = 'transparent';
   if(borders && borders.length) {
     let borderStyle = util.getBorderStyle(borders, borderOptions);
     if(borderStyle) {
@@ -138,12 +156,13 @@ function parseShapePath(data, json, layer) {
       data.props.style.stroke = hex2rgba(borderStyle.color);
       data.props.style.strokeDasharray = borderStyle.strokeDasharray;
       data.props.style.strokeLinecap = borderStyle.strokeLinecap;
+    } else {
+      data.props.style.strokeWidth = 0;
     }
   }
   else {
-    data.props.strokeWidth = 0;
+    data.props.style.strokeWidth = 0;
   }
-  console.log(data)
   return data;
 }
 
