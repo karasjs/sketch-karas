@@ -5,6 +5,7 @@ import TYPE_ENUM from './type';
 const { isNil, hex2rgba } = util;
 
 function parse(layer, json, isChildren) {
+
   json = json || sketch.fromNative(layer);
   let data = {
     tagName: '',
@@ -68,13 +69,27 @@ function parseNormal(data, json, layer, isChildren) {
 }
 
 function parseShape(data, json, layer) {
-  data.tagName = 'div';
+  data.tagName = 'p';
   data.children = [];
   let document = sketch.getSelectedDocument();
+
+  const {
+    fills,
+    borders,
+    shadows,
+    innerShadows,
+  } = json.style;
   // 递归每一层的layer
   for(let i = 0; i < json.layers.length; i++) {
     let layerJson = json.layers[i];
     let layer = document.getLayerWithID(layerJson.id);
+    layerJson.style = {
+      ...layerJson.style,
+      fills,
+      borders,
+      shadows,
+      innerShadows,
+    };
     let layerData = parse(layer, layerJson, true);
     data.children.push(layerData);
   }
@@ -185,16 +200,30 @@ function parseImage(data, json, layer) {
 function parseText(data, json, layer) {
   data.tagName = 'span';
   ['fontSize', 'fontFamily'].forEach(k => {
-    data.props.style[k] = json.style && json.style[k];
+    data.props.style[k] = json.style[k];
   });
+  // 添加line-height 默认1.4？
+  data.props.style.lineHeight = json.style.lineHeight && json.style.fontSize
+    ? json.style.lineHeight / json.style.fontSize
+    : 1.4;
+
+  // sketch 和浏览器标准并不完全对齐
+  // 浏览器中的 letter-spacing 包含最后一个字符，而 sketch 中并不是这样的。
+  if (json.style.kerning) {
+    data.props.style.letterSpacing = json.style.kerning;
+  }
   data.props.style.fontWeight = util.appKitWeightToCSSWeight(json.style.fontWeight);
   data.props.style.textAlign = json.style.alignment;
   data.props.style.color = hex2rgba(json.style.textColor);
   // fillColor override
   let fillStyle = util.getFillStyle(json.style.fills);
-  if(fillStyle && fillStyle.color) {
-    data.props.style.color = hex2rgba(fillStyle.color);
+  if(fillStyle) {
+    data.props.style.color = fillStyle;
   }
+  // if(fillStyle && fillStyle.color) {
+  //   data.props.style.color = hex2rgba(fillStyle.color);
+  // }
+
   // 0 - variable width (fixed height)
   // 1 - variable height (fixed width)
   // 2 - fixed width and height
