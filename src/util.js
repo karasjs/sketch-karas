@@ -80,11 +80,12 @@ function getFillStyle(fills, json) {
     if(!fill.enabled) {
       continue;
     }
+    // 兼容不同版本 sketch
+    fill.fillType = fill.fillType || fill.fill;
     if(fill.fillType === 'Color'|| fill.fill === 'Color') {
       return this.hex2rgba(fill.color);
-      
     }
-    else if(fill.fillType === 'Gradient') { console.log(fill);
+    else if(fill.fillType === 'Gradient') {
       let { from, to, aspectRatio, gradientType, stops } = fill.gradient;
       if(gradientType === 'Linear') {
         let s = `radialGradient(${from.x} ${from.y} ${to.x} ${to.y}`;

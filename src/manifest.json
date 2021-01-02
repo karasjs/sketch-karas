@@ -7,12 +7,14 @@
       "name": "Show Toolbar",
       "identifier": "toolbar",
       "script": "toolbar.js",
-      "handler": "onRunToolBar"
+      "handler": "onRunToolBar",
+      "shortcut": "ctrl shift t"
     },
     {
       "name": "Convert",
       "identifier": "convert",
-      "script": "convert.js"
+      "script": "convert.js",
+      "shortcut": "ctrl shift c"
     },
     {
       "name": "Link",
