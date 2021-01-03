@@ -231,7 +231,7 @@ function uploadImage(base64Data, needCompress = true, fileName = 'a.png') {
 }
 
 function saveImage(layer) {
-  const outputPath = 'images/';
+  const outputPath = '~/sketch-karas/images/';
   const format = 'png';
   const fileName = `${outputPath}${layer.id}.${format}`;
   const options = {
@@ -245,6 +245,7 @@ function saveImage(layer) {
   };
 
   sketch.export(layer, options);
+  console.log(fileName)
   return fileName;
 }
 function appKitWeightToCSSWeight(appKitWeight) {

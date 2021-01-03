@@ -28,9 +28,10 @@ function parse(layers) {
       return uploadImage(base64Data).then(res => {
         if (res != null) {
           image.props.src = res.url;
+          console.log(res.url);
           uploadImageNumber++;
         } else {
-          // saveImage(image._layer);
+          saveImage(image._layer);
           saveImageNumber++; 
         }
         delete image._layer;
