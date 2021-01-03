@@ -11,19 +11,18 @@ export default function() {
     return;
   }
   message.content = '';
-  let res = selection.layers.map(layer => {
-    return parse(layer);
+  parse(selection.layers).then(res => {
+    // 存入粘贴板
+    let pasteboard = NSPasteboard.generalPasteboard();
+    pasteboard.clearContents();
+    if(res.length > 1) {
+      pasteboard.setString_forType(JSON.stringify(res), NSPasteboardTypeString);
+    }
+    else {
+      pasteboard.setString_forType(JSON.stringify(res[0]), NSPasteboardTypeString);
+    }
+    let content = message.content || '🌈转换成功，数据已存入粘贴板！🌈';
+    UI.message(content);
+    // return res;
   });
-  // 存入粘贴板
-  let pasteboard = NSPasteboard.generalPasteboard();
-  pasteboard.clearContents();
-  if(res.length > 1) {
-    pasteboard.setString_forType(JSON.stringify(res), NSPasteboardTypeString);
-  }
-  else {
-    pasteboard.setString_forType(JSON.stringify(res[0]), NSPasteboardTypeString);
-  }
-  let content = message.content || '🌈转换成功，数据已存入粘贴板！🌈';
-  UI.message(content);
-  return res;
 }

@@ -1,6 +1,6 @@
 {
   "name": "sketch-karas",
-  "version": "0.0.3-alpha",
+  "version": "0.0.3-alpha.1",
   "description": "A sketch plugin for karas",
   "maintainers": [
     {
@@ -36,7 +36,8 @@
     "url": "git://github.com/karasjs/sketch-karas.git"
   },
   "dependencies": {
-    "karas": "^0.46.1"
+    "karas": "^0.46.1",
+    "sketch-polyfill-fetch": "^0.5.2"
   },
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "^7.12.1",

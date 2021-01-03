@@ -2,10 +2,47 @@ import sketch from 'sketch/dom';
 import util from './util';
 import TYPE_ENUM from './type';
 
-const { isNil, hex2rgba } = util;
+const { 
+  isNil, 
+  hex2rgba,
+  getFillStyle,
+  getBezierpts,
+  getBorderStyle,
+  getImageFormat,
+  appKitWeightToCSSWeight,
+  base64SrcEncodedFromNsData,
+  uploadImage,
+  saveImage,
+} = util;
 
-function parse(layer, json, isChildren) {
+const ImageQueue = [];
 
+function parse(layers) {
+  const data = layers.map(layer => parseLayer(layer));
+
+  let uploadImageNumber = 0;
+  let saveImageNumber = 0;
+  return new Promise((resolve, reject) => {
+    Promise.all(ImageQueue.map(image => {
+      const base64Data = image.props.src;
+      return uploadImage(base64Data).then(res => {
+        if (res != null) {
+          image.props.src = res.url;
+          uploadImageNumber++;
+        } else {
+          // saveImage(image._layer);
+          saveImageNumber++; 
+        }
+        delete image._layer;
+        console.log(`(图片上传${uploadImageNumber} + 储存本地${saveImageNumber}) / ${ImageQueue.length || 0}`)
+      });
+    })).then(res => {
+      resolve(data);
+    });
+  });
+}
+
+function parseLayer(layer, json, isChildren) {
   json = json || sketch.fromNative(layer);
   let data = {
     tagName: '',
@@ -90,13 +127,11 @@ function parseShape(data, json, layer) {
       shadows,
       innerShadows,
     };
-    let layerData = parse(layer, layerJson, true);
+    let layerData = parseLayer(layer, layerJson, true);
     data.children.push(layerData);
   }
   return data;
 }
-
-
 
 function parseShapePath(data, json, layer) {
   data.tagName = '$polygon';
@@ -122,7 +157,7 @@ function parseShapePath(data, json, layer) {
         C1,
         C2,
         C3,
-      } = util.getBezierpts(P0, P1, P2, cornerRadius);
+      } = getBezierpts(P0, P1, P2, cornerRadius);
 
       pts.push([M1[0] / width, M1[1] / height]);
       pts.push([C3[0] / width, C3[1] / height]);
@@ -158,14 +193,14 @@ function parseShapePath(data, json, layer) {
 
   // 描绘属性，取第一个可用的，无法多个并存
   if(fills && fills.length) {
-    let fill = util.getFillStyle(fills, json);
+    let fill = getFillStyle(fills, json);
     if(fill) {
       data.props.style.fill = fill;
     }
   }
 
   if(borders && borders.length) {
-    let borderStyle = util.getBorderStyle(borders, borderOptions);
+    let borderStyle = getBorderStyle(borders, borderOptions);
     if(borderStyle) {
       data.props.style.strokeWidth = borderStyle.width;
       data.props.style.stroke = hex2rgba(borderStyle.color);
@@ -188,12 +223,19 @@ function parseImage(data, json, layer) {
     exportFormats,
   } = json;
   // 以exportFormats第一项为导入的样式，默认为png;
-  let fileFormat = util.getImageFormat(exportFormats);
-  data.props.src = util.base64SrcEncodedFromNsData(layer.image.nsdata, fileFormat);
-  let borderStyle = util.getBorderStyle(borders, borderOptions);
+  let fileFormat = getImageFormat(exportFormats);
+
+  // ImageDataObject[layer.id] =fileFormat
+  const base64Data = base64SrcEncodedFromNsData(layer.image.nsdata, fileFormat);
+  data.props.src = base64Data;
+
+  let borderStyle = getBorderStyle(borders, borderOptions);
   if(borderStyle) {
     data.props.style.border = `${borderStyle.width}px ${borderStyle.strokeDasharray ? 'dashed' : 'solid'} ${borderStyle.color}`;
   }
+  data._layer = layer;
+
+  ImageQueue.push(data);
   return data;
 }
 
@@ -202,7 +244,9 @@ function parseText(data, json, layer) {
   ['fontSize', 'fontFamily'].forEach(k => {
     data.props.style[k] = json.style[k];
   });
-  // 添加line-height 默认1.4？
+  // 添加line-height 
+  // TODO: 如何计算
+  // 默认1.4？还是 单行 height / fontSize
   data.props.style.lineHeight = json.style.lineHeight && json.style.fontSize
     ? json.style.lineHeight / json.style.fontSize
     : 1.4;
@@ -212,17 +256,14 @@ function parseText(data, json, layer) {
   if (json.style.kerning) {
     data.props.style.letterSpacing = json.style.kerning;
   }
-  data.props.style.fontWeight = util.appKitWeightToCSSWeight(json.style.fontWeight);
+  data.props.style.fontWeight = appKitWeightToCSSWeight(json.style.fontWeight);
   data.props.style.textAlign = json.style.alignment;
   data.props.style.color = hex2rgba(json.style.textColor);
   // fillColor override
-  let fillStyle = util.getFillStyle(json.style.fills);
+  let fillStyle = getFillStyle(json.style.fills);
   if(fillStyle) {
     data.props.style.color = fillStyle;
   }
-  // if(fillStyle && fillStyle.color) {
-  //   data.props.style.color = hex2rgba(fillStyle.color);
-  // }
 
   // 0 - variable width (fixed height)
   // 1 - variable height (fixed width)
@@ -246,7 +287,7 @@ function parseGroup(data, json, layer) {
   for(let i = 0; i < json.layers.length; i++) {
     let layerJson = json.layers[i];
     let layer = document.getLayerWithID(layerJson.id);
-    let layerData = parse(layer, layerJson, true);
+    let layerData = parseLayer(layer, layerJson, true);
     data.children.push(layerData);
   }
   return data;

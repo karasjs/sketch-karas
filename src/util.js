@@ -1,4 +1,7 @@
-import message from './message';
+// import message from './message';
+import sketch from 'sketch/dom';
+
+import { reject } from "lodash";
 
 function isNil(v) {
   return v === undefined || v === null;
@@ -83,12 +86,12 @@ function getFillStyle(fills, json) {
     // 兼容不同版本 sketch
     fill.fillType = fill.fillType || fill.fill;
     if(fill.fillType === 'Color'|| fill.fill === 'Color') {
-      return this.hex2rgba(fill.color);
+      return hex2rgba(fill.color);
     }
     else if(fill.fillType === 'Gradient') {
       let { from, to, aspectRatio, gradientType, stops } = fill.gradient;
       if(gradientType === 'Linear') {
-        let s = `radialGradient(${from.x} ${from.y} ${to.x} ${to.y}`;
+        let s = `linearGradient(${from.x} ${from.y} ${to.x} ${to.y}`;
         stops.forEach(item => {
           s += `, ${item.color} ${item.position * 100}%`;
         });
@@ -201,6 +204,49 @@ function base64SrcEncodedFromNsData(nsdata, imageFormat) {
   return `data:image/${imageFormat};base64,${nsdata.base64EncodedStringWithOptions(0)}`;
 }
   
+function uploadImage(base64Data, needCompress = true, fileName = 'a.png') {
+  const url = 'https://animconfig-office.alipay.net/api/ae2karas/upload';
+  return fetch(url, {
+    method: 'post',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      imgData: base64Data,
+      fileName: fileName,
+      needCompress,
+    }),
+  })
+  .then(res => {
+    if (res.ok) {
+      return JSON.parse(res.text()._value);
+    } else {
+      return null;
+    }
+  })
+  .catch(e => {
+    console.error(e)
+  });
+}
+
+function saveImage(layer) {
+  const outputPath = 'images/';
+  const format = 'png';
+  const fileName = `${outputPath}${layer.id}.${format}`;
+  const options = {
+    scales: 1,
+    formats: 'png',
+    trimmed: true, // 剪切图片透明无效区域
+    'use-id-for-name': true,
+    'group-contents-only': true,
+    'save-for-web': false,
+    output: outputPath
+  };
+
+  sketch.export(layer, options);
+  return fileName;
+}
 function appKitWeightToCSSWeight(appKitWeight) {
   return [100,100,100,200,300,400,500,500,600,700,800,900,900,900,900,900][appKitWeight] || 500;
 }
@@ -263,4 +309,6 @@ export default {
   base64SrcEncodedFromNsData,
   appKitWeightToCSSWeight,
   getBezierpts,
+  uploadImage,
+  saveImage,
 }
