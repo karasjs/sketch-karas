@@ -1,9 +1,11 @@
 import sketch from 'sketch/dom';
+import { Image, Rectangle } from 'sketch/dom';
+
 import util from './util';
 import TYPE_ENUM from './type';
 
-const { 
-  isNil, 
+const {
+  isNil,
   hex2rgba,
   getFillStyle,
   getBezierpts,
@@ -17,9 +19,8 @@ const {
 
 const ImageQueue = [];
 
-function parse(layers) {
+function parse (layers) {
   const data = layers.map(layer => parseLayer(layer));
-
   let uploadImageNumber = 0;
   let saveImageNumber = 0;
   return new Promise((resolve, reject) => {
@@ -28,11 +29,10 @@ function parse(layers) {
       return uploadImage(base64Data).then(res => {
         if (res != null) {
           image.props.src = res.url;
-          console.log(res.url);
           uploadImageNumber++;
         } else {
           saveImage(image._layer);
-          saveImageNumber++; 
+          saveImageNumber++;
         }
         delete image._layer;
         console.log(`(图片上传${uploadImageNumber} + 储存本地${saveImageNumber}) / ${ImageQueue.length || 0}`)
@@ -43,37 +43,37 @@ function parse(layers) {
   });
 }
 
-function parseLayer(layer, json, isChildren) {
+function parseLayer (layer, json, isChildren) {
   json = json || sketch.fromNative(layer);
   let data = {
     tagName: '',
   };
   parseNormal(data, json, layer, isChildren);
-  if(json.type === TYPE_ENUM.SHAPE_PATH) {
+  if (json.type === TYPE_ENUM.SHAPE_PATH) {
     parseShapePath(data, json, layer, isChildren);
   }
-  else if(json.type === TYPE_ENUM.SHAPE) {
+  else if (json.type === TYPE_ENUM.SHAPE) {
     parseShape(data, json, layer, isChildren);
   }
-  else if(json.type === TYPE_ENUM.IMAGE) {
+  else if (json.type === TYPE_ENUM.IMAGE) {
     parseImage(data, json, layer, isChildren);
   }
-  else if(json.type === TYPE_ENUM.TEXT) {
+  else if (json.type === TYPE_ENUM.TEXT) {
     parseText(data, json, layer, isChildren);
   }
-  else if(json.type === TYPE_ENUM.GROUP || json.type === TYPE_ENUM.SYMBOL_MASTER) {
+  else if (json.type === TYPE_ENUM.GROUP || json.type === TYPE_ENUM.SYMBOL_MASTER) {
     parseGroup(data, json, layer, isChildren);
   }
-  else if(json.type === TYPE_ENUM.ARTBOARD) {
+  else if (json.type === TYPE_ENUM.ARTBOARD) {
     parseArtboard(data, json, layer, isChildren);
   }
-  else if(json.type === TYPE_ENUM.SYMBOL_INSTANCE) {
+  else if (json.type === TYPE_ENUM.SYMBOL_INSTANCE) {
     parseSymbolInstance(data, json, layer, isChildren);
   }
   return data;
 }
 
-function parseNormal(data, json, layer, isChildren) {
+function parseNormal (data, json, layer, isChildren) {
   let { style = {}, transform } = json;
   ['id', 'name'].forEach(k => {
     data[k] = json[k];
@@ -83,7 +83,7 @@ function parseNormal(data, json, layer, isChildren) {
     position: 'absolute',
   };
   // 组里的元素相对父位置
-  if(isChildren) {
+  if (isChildren) {
     // sketch 为 x / y, karas 为 left / top
     data.props.style.left = json.frame.x;
     data.props.style.top = json.frame.y;
@@ -91,52 +91,55 @@ function parseNormal(data, json, layer, isChildren) {
   ['width', 'height'].forEach(k => {
     data.props.style[k] = json.frame[k];
   });
-  if(!isNil(style.opacity) && style.opacity !== 1) {
+  if (!isNil(style.opacity) && style.opacity !== 1) {
     data.props.style.opacity = style.opacity;
   }
-  if(transform.rotation) {
+  if (transform.rotation) {
     data.props.style.rotateZ = transform.rotation;
   }
-  if(transform.flippedHorizontally) {
+  if (transform.flippedHorizontally) {
     data.props.style.scaleX = -1;
   }
-  if(transform.flippedVertically) {
+  if (transform.flippedVertically) {
     data.props.style.scaleY = -1;
   }
   return data;
 }
 
-function parseShape(data, json, layer) {
+function parseShape (data, json, layer) {
   data.tagName = 'p';
   data.children = [];
   let document = sketch.getSelectedDocument();
 
-  const {
-    fills,
-    borders,
-    shadows,
-    innerShadows,
-  } = json.style;
-  // 递归每一层的layer
-  for(let i = 0; i < json.layers.length; i++) {
-    let layerJson = json.layers[i];
-    let layer = document.getLayerWithID(layerJson.id);
-    layerJson.style = {
-      ...layerJson.style,
-      fills,
-      borders,
-      shadows,
-      innerShadows,
-    };
-    let layerData = parseLayer(layer, layerJson, true);
-    data.children.push(layerData);
-  }
+  const options = { formats: 'png', output: false }
+  const buffer = sketch.export(json.layers, options)
+
+  const imageLayer = new Image({
+    image: buffer[0],
+  })
+
+  parseImage(data, imageLayer, imageLayer);
+
+  // // 递归每一层的layer
+  // for (let i = 0; i < json.layers.length; i++) {
+  //   let layerJson = json.layers[i];
+  //   let layer = document.getLayerWithID(layerJson.id);
+  //   layerJson.style = {
+  //     ...layerJson.style,
+  //     fills,
+  //     borders,
+  //     shadows,
+  //     innerShadows,
+  //   };
+  //   let layerData = parseLayer(layer, layerJson, true);
+  //   data.children.push(layerData);
+  // }
   return data;
 }
 
-function parseShapePath(data, json, layer) {
+function parseShapePath (data, json, layer) {
   data.tagName = '$polygon';
-  let { points,frame: {width, height}, style: { fills, borders, borderOptions } } = json;
+  let { points, frame: { width, height }, style: { fills, borders, borderOptions } } = json;
   // 点和控制点
   let pts = [];
   let cts = [];
@@ -164,16 +167,16 @@ function parseShapePath(data, json, layer) {
       pts.push([C3[0] / width, C3[1] / height]);
       cts.push([C1[0] / width, C1[1] / height, C2[0] / width, C2[1] / height], []);
       hasControl = true;
-    } 
+    }
     else {
-      
+
       pts.push([point.x, point.y]);
-      if(!json.closed && index === points.length - 1) {
+      if (!json.closed && index === points.length - 1) {
         return;
       }
 
       // sketch导出的curveFrom和curveTo有问题，如果是straight，应该直接是point
-      if(nextPointType === 'Straight') {
+      if (nextPointType === 'Straight') {
         curveTo = nextPoint.point;
       }
       if (pointType === 'Straight' && nextPointType === 'Straight') {
@@ -185,7 +188,7 @@ function parseShapePath(data, json, layer) {
       }
     }
     data.props.points = pts;
-    if(hasControl) {
+    if (hasControl) {
       data.props.controls = cts;
     }
 
@@ -193,16 +196,16 @@ function parseShapePath(data, json, layer) {
 
 
   // 描绘属性，取第一个可用的，无法多个并存
-  if(fills && fills.length) {
+  if (fills && fills.length) {
     let fill = getFillStyle(fills, json);
-    if(fill) {
+    if (fill) {
       data.props.style.fill = fill;
     }
   }
 
-  if(borders && borders.length) {
+  if (borders && borders.length) {
     let borderStyle = getBorderStyle(borders, borderOptions);
-    if(borderStyle) {
+    if (borderStyle) {
       data.props.style.strokeWidth = borderStyle.width;
       data.props.style.stroke = hex2rgba(borderStyle.color);
       data.props.style.strokeDasharray = borderStyle.strokeDasharray;
@@ -217,7 +220,7 @@ function parseShapePath(data, json, layer) {
   return data;
 }
 
-function parseImage(data, json, layer) {
+function parseImage (data, json, layer) {
   data.tagName = 'img';
   let {
     style: { borders, borderOptions },
@@ -226,12 +229,11 @@ function parseImage(data, json, layer) {
   // 以exportFormats第一项为导入的样式，默认为png;
   let fileFormat = getImageFormat(exportFormats);
 
-  // ImageDataObject[layer.id] =fileFormat
   const base64Data = base64SrcEncodedFromNsData(layer.image.nsdata, fileFormat);
   data.props.src = base64Data;
 
   let borderStyle = getBorderStyle(borders, borderOptions);
-  if(borderStyle) {
+  if (borderStyle) {
     data.props.style.border = `${borderStyle.width}px ${borderStyle.strokeDasharray ? 'dashed' : 'solid'} ${borderStyle.color}`;
   }
   data._layer = layer;
@@ -240,7 +242,7 @@ function parseImage(data, json, layer) {
   return data;
 }
 
-function parseText(data, json, layer) {
+function parseText (data, json, layer) {
   data.tagName = 'span';
   ['fontSize', 'fontFamily'].forEach(k => {
     data.props.style[k] = json.style[k];
@@ -262,7 +264,7 @@ function parseText(data, json, layer) {
   data.props.style.color = hex2rgba(json.style.textColor);
   // fillColor override
   let fillStyle = getFillStyle(json.style.fills);
-  if(fillStyle) {
+  if (fillStyle) {
     data.props.style.color = fillStyle;
   }
 
@@ -270,22 +272,22 @@ function parseText(data, json, layer) {
   // 1 - variable height (fixed width)
   // 2 - fixed width and height
   const textBehaviour = layer.sketchObject.textBehaviour();
-  if(textBehaviour === 0) {
+  if (textBehaviour === 0) {
     delete data.props.style.width;
   }
-  else if(textBehaviour === 1) {
+  else if (textBehaviour === 1) {
     delete data.props.style.height;
   }
   data.children = [json.text];
   return data;
 }
 
-function parseGroup(data, json, layer) {
+function parseGroup (data, json, layer) {
   data.tagName = 'div';
   data.children = [];
   let document = sketch.getSelectedDocument();
   // 递归每一层的layer
-  for(let i = 0; i < json.layers.length; i++) {
+  for (let i = 0; i < json.layers.length; i++) {
     let layerJson = json.layers[i];
     let layer = document.getLayerWithID(layerJson.id);
     let layerData = parseLayer(layer, layerJson, true);
@@ -294,23 +296,23 @@ function parseGroup(data, json, layer) {
   return data;
 }
 
-function parseArtboard(data, json, layer) {
+function parseArtboard (data, json, layer) {
   data.tagName = 'div';
   data.children = [];
   let document = sketch.getSelectedDocument();
   // 递归每一层的layer
-  for(let i = 0; i < json.layers.length; i++) {
+  for (let i = 0; i < json.layers.length; i++) {
     let layerJson = json.layers[i];
     let layer = document.getLayerWithID(layerJson.id);
     let layerData = convert(layer, layerJson);
     data.children.push(layerData);
   }
-  if(json.background.enabled && json.background.color) {
+  if (json.background.enabled && json.background.color) {
     data.props.style.backgroundColor = json.background.color;
   }
   return data;
 }
 
-function parseSymbolInstance(data, json, layer) {}
+function parseSymbolInstance (data, json, layer) { }
 
 export default parse;

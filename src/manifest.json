@@ -8,12 +8,7 @@
       "identifier": "toolbar",
       "script": "toolbar.js",
       "handler": "onRunToolBar",
-      "shortcut": "ctrl shift t",
-      "handlers": {
-        "actions": {
-          "OpenDocument": "onRunToolBar"
-        }
-      }
+      "shortcut": "ctrl shift t"
     },
     {
       "name": "Convert",
