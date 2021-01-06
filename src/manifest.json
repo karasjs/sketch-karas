@@ -17,6 +17,12 @@
       "shortcut": "ctrl shift c"
     },
     {
+      "name": "ConvertToImage",
+      "identifier": "convertToImage",
+      "script": "convertToImage.js",
+      "shortcut": "ctrl shift d"
+    },
+    {
       "name": "Link",
       "identifier": "link",
       "script": "link.js"
@@ -29,12 +35,6 @@
   ],
   "menu": {
     "title": "sketch-karas",
-    "items": [
-      "toolbar",
-      "-",
-      "convert",
-      "link",
-      "about"
-    ]
+    "items": ["toolbar", "-", "convert", "link", "about"]
   }
 }

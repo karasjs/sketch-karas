@@ -71,68 +71,62 @@ function rgba2int (color) {
   return res;
 }
 
-function getFillStyle (fills, json) {
-  if (!fills || !fills.length) {
+function getFillStyle (fill) {
+  if (!fill || !fill.enabled) {
     return;
   }
-  for (let i = 0; i < fills.length; i++) {
-    let fill = fills[i];
-    if (!fill.enabled) {
-      continue;
+  // 兼容不同版本 sketch
+  fill.fillType = fill.fillType || fill.fill;
+  if (fill.fillType === 'Color' || fill.fill === 'Color') {
+    return hex2rgba(fill.color);
+  }
+  else if (fill.fillType === 'Gradient') {
+    let { from, to, aspectRatio, gradientType, stops } = fill.gradient;
+    if (gradientType === 'Linear') {
+      let s = `linearGradient(${from.x} ${from.y} ${to.x} ${to.y}`;
+      stops.forEach(item => {
+        s += `, ${item.color} ${item.position * 100}%`;
+      });
+      s += ')';
+      return s;
     }
-    // 兼容不同版本 sketch
-    fill.fillType = fill.fillType || fill.fill;
-    if (fill.fillType === 'Color' || fill.fill === 'Color') {
-      return hex2rgba(fill.color);
+    else if (gradientType === 'Radial') {
+      let s = `radialGradient(${from.x} ${from.y} ${to.x} ${to.y} ${aspectRatio || 1}`;
+      stops.forEach(item => {
+        s += `, ${item.color} ${item.position * 100}%`;
+      });
+      s += ')';
+      return s;
     }
-    else if (fill.fillType === 'Gradient') {
-      let { from, to, aspectRatio, gradientType, stops } = fill.gradient;
-      if (gradientType === 'Linear') {
-        let s = `linearGradient(${from.x} ${from.y} ${to.x} ${to.y}`;
-        stops.forEach(item => {
-          s += `, ${item.color} ${item.position * 100}%`;
+    else if (gradientType === 'Angular') {
+      let s = `conicGradient(`;
+      stops = stops.slice(0);
+      let i = stops.length - 1;
+      if (stops[i].position < 1) {
+        stops.push({
+          position: 1,
+          color: stops[i].color,
         });
-        s += ')';
-        return s;
       }
-      else if (gradientType === 'Radial') {
-        let s = `radialGradient(${from.x} ${from.y} ${to.x} ${to.y} ${aspectRatio || 1}`;
-        stops.forEach(item => {
-          s += `, ${item.color} ${item.position * 100}%`;
+      if (stops[0].position > 0) {
+        stops.unshift({
+          position: 0,
+          color: stops[0].color,
         });
-        s += ')';
-        return s;
       }
-      else if (gradientType === 'Angular') {
-        let s = `conicGradient(`;
-        stops = stops.slice(0);
-        let i = stops.length - 1;
-        if (stops[i].position < 1) {
-          stops.push({
-            position: 1,
-            color: stops[i].color,
-          });
+      stops.forEach((item, i) => {
+        if (i) {
+          s += ', ';
         }
-        if (stops[0].position > 0) {
-          stops.unshift({
-            position: 0,
-            color: stops[0].color,
-          });
-        }
-        stops.forEach((item, i) => {
-          if (i) {
-            s += ', ';
-          }
-          s += `${item.color} ${item.position * 100}%`;
-        });
-        s += ')';
-        return s;
-      }
+        s += `${item.color} ${item.position * 100}%`;
+      });
+      s += ')';
+      return s;
     }
-    else {
-      // message.content = fill || '⚠️暂不支持图案填充⚠️';
-      return
-    }
+  }
+  else {
+    message.content = fill || '⚠️暂不支持图案填充⚠️';
+    return
   }
 }
 

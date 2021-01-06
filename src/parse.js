@@ -23,9 +23,14 @@ function parse (layers) {
   const data = layers.map(layer => parseLayer(layer));
   let uploadImageNumber = 0;
   let saveImageNumber = 0;
+  let base64ImageNumber = 0;
   return new Promise((resolve, reject) => {
     Promise.all(ImageQueue.map(image => {
       const base64Data = image.props.src;
+      if (base64Data.length < 4000) {
+        base64ImageNumber++;
+        return Promise.resolve();
+      }
       return uploadImage(base64Data).then(res => {
         if (res != null) {
           image.props.src = res.url;
@@ -35,7 +40,7 @@ function parse (layers) {
           saveImageNumber++;
         }
         delete image._layer;
-        console.log(`(图片上传${uploadImageNumber} + 储存本地${saveImageNumber}) / ${ImageQueue.length || 0}`)
+        console.log(`(图片上传${uploadImageNumber} + 储存本地${saveImageNumber} + base64图片${base64ImageNumber}) / ${ImageQueue.length || 0}`)
       });
     })).then(res => {
       resolve(data);
@@ -45,9 +50,18 @@ function parse (layers) {
 
 function parseLayer (layer, json, isChildren) {
   json = json || sketch.fromNative(layer);
+
   let data = {
-    tagName: '',
+    tagName: 'div',
   };
+  // hidden 暂时直接去掉
+  if (json.hidden) {
+    return {
+      tagName: 'div',
+      children: [],
+    };
+  }
+
   parseNormal(data, json, layer, isChildren);
   if (json.type === TYPE_ENUM.SHAPE_PATH) {
     parseShapePath(data, json, layer, isChildren);
@@ -103,37 +117,35 @@ function parseNormal (data, json, layer, isChildren) {
   if (transform.flippedVertically) {
     data.props.style.scaleY = -1;
   }
+
+  // 目前只支持高斯模糊
+  if (style.blur.enabled &&
+    style.blur.blurType === 'Gaussian' &&
+    style.blur.radius > 0
+  ) {
+    data.props.style.filter = `blur(${style.blur.radius}px)`;
+  }
+
   return data;
 }
 
 function parseShape (data, json, layer) {
-  data.tagName = 'p';
-  data.children = [];
-  let document = sketch.getSelectedDocument();
-
   const options = { formats: 'png', output: false }
-  const buffer = sketch.export(json.layers, options)
+  let buffer;
+  try {
+    buffer = sketch.export(json.layers, options)
+  } catch (e) {
+    return ({
+      tagName: 'div',
+      children: [],
+    });
+  };
 
   const imageLayer = new Image({
     image: buffer[0],
   })
-
   parseImage(data, imageLayer, imageLayer);
 
-  // // 递归每一层的layer
-  // for (let i = 0; i < json.layers.length; i++) {
-  //   let layerJson = json.layers[i];
-  //   let layer = document.getLayerWithID(layerJson.id);
-  //   layerJson.style = {
-  //     ...layerJson.style,
-  //     fills,
-  //     borders,
-  //     shadows,
-  //     innerShadows,
-  //   };
-  //   let layerData = parseLayer(layer, layerJson, true);
-  //   data.children.push(layerData);
-  // }
   return data;
 }
 
@@ -197,9 +209,13 @@ function parseShapePath (data, json, layer) {
 
   // 描绘属性，取第一个可用的，无法多个并存
   if (fills && fills.length) {
-    let fill = getFillStyle(fills, json);
-    if (fill) {
-      data.props.style.fill = fill;
+    const fillsStyle = [];
+    for (let i = 0; i < fills.length; i++) {
+      const fill = getFillStyle(fills[i], json);
+      fillsStyle.push(fill);
+    }
+    if (fillsStyle) {
+      data.props.style.fill = fillsStyle;
     }
   }
 
@@ -263,15 +279,17 @@ function parseText (data, json, layer) {
   data.props.style.textAlign = json.style.alignment;
   data.props.style.color = hex2rgba(json.style.textColor);
   // fillColor override
-  let fillStyle = getFillStyle(json.style.fills);
-  if (fillStyle) {
-    data.props.style.color = fillStyle;
-  }
+  // 字体渐变暂不支持
+  // let fillStyle = getFillStyle(json.style.fills[0]);
+  // if (fillStyle) {
+  //   data.props.style.color = fillStyle;
+  // }
 
   // 0 - variable width (fixed height)
   // 1 - variable height (fixed width)
   // 2 - fixed width and height
-  const textBehaviour = layer.sketchObject.textBehaviour();
+
+  const textBehaviour = layer ? layer.sketchObject.textBehaviour() : 1;
   if (textBehaviour === 0) {
     delete data.props.style.width;
   }
@@ -304,7 +322,7 @@ function parseArtboard (data, json, layer) {
   for (let i = 0; i < json.layers.length; i++) {
     let layerJson = json.layers[i];
     let layer = document.getLayerWithID(layerJson.id);
-    let layerData = convert(layer, layerJson);
+    let layerData = parseLayer(layer, layerJson);
     data.children.push(layerData);
   }
   if (json.background.enabled && json.background.color) {
@@ -313,6 +331,55 @@ function parseArtboard (data, json, layer) {
   return data;
 }
 
-function parseSymbolInstance (data, json, layer) { }
+function parseSymbolInstance (data, json, layer) {
+  const document = sketch.getSelectedDocument();
+  var source = document.getSymbolMasterWithID(json.symbolId)
+
+  data.tagName = 'div';
+  data.children = [];
+
+  // 子
+  const { width, height } = source.frame;
+  // 父
+  const { width: pwidth, height: pheight } = json.frame;
+  // 比例修改
+  let scaleX = 1;
+  let scaleY = 1;
+
+  if (data.props.style.scaleX) {
+    scaleX *= width ? pwidth / width : 0;
+  } else {
+    scaleX = width ? pwidth / width : 0;
+  }
+
+  if (data.props.style.scaleY) {
+    scaleY *= height ? pheight / height : 0;
+  } else {
+    scaleY = height ? pheight / height : 0;
+  }
+
+  const innerData = {
+    tagName: 'div',
+    props: {
+      style: {
+        position: 'absolute',
+        left: 0,
+        top: 0,
+        scaleX,
+        scaleY,
+      },
+    },
+    children: [],
+  };
+
+  for (let i = 0; i < source.layers.length; i++) {
+    let layerJson = source.layers[i];
+    let layer = document.getLayerWithID(layerJson.id);
+    let layerData = parseLayer(layer, layerJson, true);
+    innerData.children.push(layerData);
+  }
+  data.children.push(innerData);
+  return data;
+}
 
 export default parse;
