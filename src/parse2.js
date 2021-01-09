@@ -17,10 +17,27 @@ const {
   saveImage,
 } = util;
 
+let root = {
+  tagName: 'div',
+  props: {
+    style: {
+      left: 0,
+      fix_left: 0,
+      top: 0,
+      fix_top: 0,
+    }
+  },
+  children: [],
+}
+
 const ImageQueue = [];
 
 function parse (layers) {
   const data = layers.map(layer => parseLayer(layer));
+
+  root.props.style.width = data[0].props.style.width;
+  root.props.style.height = data[0].props.style.height;
+
   let uploadImageNumber = 0;
   let saveImageNumber = 0;
   let base64ImageNumber = 0;
@@ -43,13 +60,21 @@ function parse (layers) {
         console.log(`(图片上传${uploadImageNumber} + 储存本地${saveImageNumber} + base64图片${base64ImageNumber}) / ${ImageQueue.length || 0}`)
       });
     })).then(res => {
-      resolve(data);
+      const pRoot = root.children.forEach(({ props }, name) => {
+        props.style.left = props.style.fixed_left;
+        props.style.top = props.style.fixed_top;
+      });
+      console.log(JSON.stringify(root));
+      // resolve(data);
+
+      console.log(layers[0])
+      // resolve([root]);
+      resolve([root]);
     });
   });
 }
 
-function parseLayer (layer, json, isChildren) {
-  console.log(layer, '==========')
+function parseLayer (layer, json, isChildren, lpPos) {
   json = json || sketch.fromNative(layer);
 
   let data = {
@@ -63,8 +88,12 @@ function parseLayer (layer, json, isChildren) {
     };
   }
 
-  console.log(json)
-  parseNormal(data, json, layer, isChildren);
+  let pPos = {
+    fix_x: lpPos?.fix_x || 0,
+    fix_y: lpPos?.fix_y || 0,
+  };
+  console.log(lpPos, '--------------');
+  parseNormal(data, json, layer, isChildren, pPos);
   if (json.type === TYPE_ENUM.SHAPE_PATH) {
     parseShapePath(data, json, layer, isChildren);
   }
@@ -78,18 +107,19 @@ function parseLayer (layer, json, isChildren) {
     parseText(data, json, layer, isChildren);
   }
   else if (json.type === TYPE_ENUM.GROUP || json.type === TYPE_ENUM.SYMBOL_MASTER) {
-    parseGroup(data, json, layer, isChildren);
+    parseGroup(data, json, layer, isChildren, pPos);
   }
   else if (json.type === TYPE_ENUM.ARTBOARD) {
     parseArtboard(data, json, layer, isChildren);
   }
   else if (json.type === TYPE_ENUM.SYMBOL_INSTANCE) {
-    parseSymbolInstance(data, json, layer, isChildren);
+    parseSymbolInstance(data, json, layer, isChildren, pPos);
   }
+
   return data;
 }
 
-function parseNormal (data, json, layer, isChildren) {
+function parseNormal (data, json, layer, isChildren, pPos) {
   let { style = {}, transform } = json;
   ['id', 'name'].forEach(k => {
     data[k] = json[k];
@@ -98,12 +128,35 @@ function parseNormal (data, json, layer, isChildren) {
   data.props.style = {
     position: 'absolute',
   };
+
+  const {
+    fix_x: px = 0,
+    fix_y: py = 0,
+  } = pPos || {
+    fix_x: 0,
+    fix_y: 0,
+  }
+  // console.log(px, py, '-----------', pName, pLayer)
   // 组里的元素相对父位置
   if (isChildren) {
     // sketch 为 x / y, karas 为 left / top
     data.props.style.left = json.frame.x;
     data.props.style.top = json.frame.y;
+    data.props.style.fixed_left = (json.frame.x || 0) + px;
+    data.props.style.fixed_top = (json.frame.y || 0) + py;
+    pPos.fix_x = data.props.style.fixed_left;
+    pPos.fix_y = data.props.style.fixed_top;
   }
+  // else {
+  //   data.props.style.fixed_left = (json.frame.x || 0) + px;
+  //   data.props.style.fixed_top = (json.frame.y || 0) + py;
+  //   pPos.fix_x = data.props.style.fixed_left;
+  //   pPos.fix_y = data.props.style.fixed_top;
+  // }
+
+  // console.log(pPos.fix_x, data.props.style.fixed_left, layer.frame.x, '-----------2', data.name);
+
+
   ['width', 'height'].forEach(k => {
     data.props.style[k] = json.frame[k];
   });
@@ -235,6 +288,7 @@ function parseShapePath (data, json, layer) {
   else {
     data.props.style.strokeWidth = 0;
   }
+  root.children.push(data);
   return data;
 }
 
@@ -257,11 +311,11 @@ function parseImage (data, json, layer) {
   data._layer = layer;
 
   ImageQueue.push(data);
+  root.children.push(data);
   return data;
 }
 
 function parseText (data, json, layer) {
-  console.log(json)
   data.tagName = 'span';
   ['fontSize', 'fontFamily'].forEach(k => {
     data.props.style[k] = json.style[k];
@@ -300,18 +354,21 @@ function parseText (data, json, layer) {
     delete data.props.style.height;
   }
   data.children = [json.text];
+  root.children.push(data);
   return data;
 }
 
-function parseGroup (data, json, layer) {
+function parseGroup (data, json, layer, isChildren, pPos) {
   data.tagName = 'div';
   data.children = [];
   let document = sketch.getSelectedDocument();
+  // const pPos = layer;
+  // console.log('Group:', pPos);
   // 递归每一层的layer
   for (let i = 0; i < json.layers.length; i++) {
     let layerJson = json.layers[i];
     let layer = document.getLayerWithID(layerJson.id);
-    let layerData = parseLayer(layer, layerJson, true);
+    let layerData = parseLayer(layer, layerJson, true, pPos);
     data.children.push(layerData);
   }
   return data;
@@ -334,18 +391,17 @@ function parseArtboard (data, json, layer) {
   return data;
 }
 
-function parseSymbolInstance (data, json, layer) {
+function parseSymbolInstance (data, json, layer, isChildren, pPos) {
   const document = sketch.getSelectedDocument();
   var source = document.getSymbolMasterWithID(json.symbolId)
 
-  console.log(source.overrides)
   data.tagName = 'div';
   data.children = [];
 
   // 子
   const { width, height } = source.frame;
   // 父
-  const { width: pwidth, height: pheight } = json.frame;
+  const { width: pwidth, height: pheight, x, y } = json.frame;
   // 比例修改
   let scaleX = 1;
   let scaleY = 1;
@@ -367,8 +423,10 @@ function parseSymbolInstance (data, json, layer) {
     props: {
       style: {
         position: 'absolute',
-        left: 0,
-        top: 0,
+        left: x,
+        top: y,
+        fix_left: x + pPos.fix_x,
+        fix_top: y + pPos.fix_y,
         scaleX,
         scaleY,
       },
@@ -379,7 +437,7 @@ function parseSymbolInstance (data, json, layer) {
   for (let i = 0; i < source.layers.length; i++) {
     let layerJson = source.layers[i];
     let layer = document.getLayerWithID(layerJson.id);
-    let layerData = parseLayer(layer, layerJson, true);
+    let layerData = parseLayer(layer, layerJson, true, pPos);
     innerData.children.push(layerData);
   }
   data.children.push(innerData);

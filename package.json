@@ -9,7 +9,7 @@
     }
   ],
   "engines": {
-    "sketch": ">=57.0"
+    "sketch": ">=70.0"
   },
   "skpm": {
     "name": "sketch-karas",

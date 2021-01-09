@@ -35,6 +35,6 @@
   ],
   "menu": {
     "title": "sketch-karas",
-    "items": ["toolbar", "-", "convert", "link", "about"]
+    "items": ["toolbar", "-", "convert", "convertToImage", "link", "about"]
   }
 }
