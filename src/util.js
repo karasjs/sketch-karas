@@ -1,48 +1,48 @@
-import message from './message';
+import sketch from 'sketch/dom';
 
-function isNil(v) {
+function isNil (v) {
   return v === undefined || v === null;
 }
-  
-function hex2rgba(color) {
+
+function hex2rgba (color) {
   return int2rgba(rgba2int(color));
 }
 
-function int2rgba(color) {
-  if(Array.isArray(color)) {
-    if(color.length === 4) {
+function int2rgba (color) {
+  if (Array.isArray(color)) {
+    if (color.length === 4) {
       return 'rgba(' + color.join(',') + ')';
     }
-    else if(color.length === 3) {
+    else if (color.length === 3) {
       return 'rgba(' + color.join(',') + ',1)';
     }
   }
   return color || 'rgba(0,0,0,0)';
 }
-  
-function rgba2int(color) {
-  if(Array.isArray(color)) {
+
+function rgba2int (color) {
+  if (Array.isArray(color)) {
     return color;
   }
   let res = [];
-  if(!color || color === 'transparent') {
+  if (!color || color === 'transparent') {
     res = [0, 0, 0, 0];
   }
-  else if(color.charAt(0) === '#') {
+  else if (color.charAt(0) === '#') {
     color = color.slice(1);
-    if(color.length === 3) {
+    if (color.length === 3) {
       res.push(parseInt(color.charAt(0) + color.charAt(0), 16));
       res.push(parseInt(color.charAt(1) + color.charAt(1), 16));
       res.push(parseInt(color.charAt(2) + color.charAt(2), 16));
       res[3] = 1;
     }
-    else if(color.length === 6) {
+    else if (color.length === 6) {
       res.push(parseInt(color.slice(0, 2), 16));
       res.push(parseInt(color.slice(2, 4), 16));
       res.push(parseInt(color.slice(4), 16));
       res[3] = 1;
     }
-    else if(color.length === 8) {
+    else if (color.length === 8) {
       res.push(parseInt(color.slice(0, 2), 16));
       res.push(parseInt(color.slice(2, 4), 16));
       res.push(parseInt(color.slice(4, 6), 16));
@@ -55,9 +55,9 @@ function rgba2int(color) {
   }
   else {
     let c = color.match(/rgba?\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?\s*\)/i);
-    if(c) {
+    if (c) {
       res = [parseInt(c[1]), parseInt(c[2]), parseInt(c[3])];
-      if(!isNil(c[4])) {
+      if (!isNil(c[4])) {
         res[3] = parseFloat(c[4]);
       }
       else {
@@ -70,100 +70,94 @@ function rgba2int(color) {
   }
   return res;
 }
-  
-function getFillStyle(fills, json) {
-  if(!fills || !fills.length) {
+
+function getFillStyle (fill) {
+  if (!fill || !fill.enabled) {
     return;
   }
-  for(let i = 0; i < fills.length; i++) {
-    let fill = fills[i];
-    if(!fill.enabled) {
-      continue;
+  // 兼容不同版本 sketch
+  fill.fillType = fill.fillType || fill.fill;
+  if (fill.fillType === 'Color' || fill.fill === 'Color') {
+    return hex2rgba(fill.color);
+  }
+  else if (fill.fillType === 'Gradient') {
+    let { from, to, aspectRatio, gradientType, stops } = fill.gradient;
+    if (gradientType === 'Linear') {
+      let s = `linearGradient(${from.x} ${from.y} ${to.x} ${to.y}`;
+      stops.forEach(item => {
+        s += `, ${item.color} ${item.position * 100}%`;
+      });
+      s += ')';
+      return s;
     }
-    // 兼容不同版本 sketch
-    fill.fillType = fill.fillType || fill.fill;
-    if(fill.fillType === 'Color'|| fill.fill === 'Color') {
-      return this.hex2rgba(fill.color);
+    else if (gradientType === 'Radial') {
+      let s = `radialGradient(${from.x} ${from.y} ${to.x} ${to.y} ${aspectRatio || 1}`;
+      stops.forEach(item => {
+        s += `, ${item.color} ${item.position * 100}%`;
+      });
+      s += ')';
+      return s;
     }
-    else if(fill.fillType === 'Gradient') {
-      let { from, to, aspectRatio, gradientType, stops } = fill.gradient;
-      if(gradientType === 'Linear') {
-        let s = `radialGradient(${from.x} ${from.y} ${to.x} ${to.y}`;
-        stops.forEach(item => {
-          s += `, ${item.color} ${item.position * 100}%`;
+    else if (gradientType === 'Angular') {
+      let s = `conicGradient(`;
+      stops = stops.slice(0);
+      let i = stops.length - 1;
+      if (stops[i].position < 1) {
+        stops.push({
+          position: 1,
+          color: stops[i].color,
         });
-        s += ')';
-        return s;
       }
-      else if(gradientType === 'Radial') {
-        let s = `radialGradient(${from.x} ${from.y} ${to.x} ${to.y} ${aspectRatio || 1}`;
-        stops.forEach(item => {
-          s += `, ${item.color} ${item.position * 100}%`;
+      if (stops[0].position > 0) {
+        stops.unshift({
+          position: 0,
+          color: stops[0].color,
         });
-        s += ')';
-        return s;
       }
-      else if(gradientType === 'Angular') {
-        let s = `conicGradient(`;
-        stops = stops.slice(0);
-        let i = stops.length - 1;
-        if(stops[i].position < 1) {
-          stops.push({
-            position: 1,
-            color: stops[i].color,
-          });
+      stops.forEach((item, i) => {
+        if (i) {
+          s += ', ';
         }
-        if(stops[0].position > 0) {
-          stops.unshift({
-            position: 0,
-            color: stops[0].color,
-          });
-        }
-        stops.forEach((item, i) => {
-          if(i) {
-            s += ', ';
-          }
-          s += `${item.color} ${item.position * 100}%`;
-        });
-        s += ')';
-        return s;
-      }
+        s += `${item.color} ${item.position * 100}%`;
+      });
+      s += ')';
+      return s;
     }
-    else {
-      // message.content = fill || '⚠️暂不支持图案填充⚠️';
-      return
-    }
+  }
+  else {
+    message.content = fill || '⚠️暂不支持图案填充⚠️';
+    return
   }
 }
-  
-function getBorderStyle(borders, borderOptions) {
-  if(!borders || !borders.length) {
+
+function getBorderStyle (borders, borderOptions) {
+  if (!borders || !borders.length) {
     return;
   }
-  for(let i = 0; i < borders.length; i++) {
+  for (let i = 0; i < borders.length; i++) {
     let border = borders[i];
-    if(!border.enabled || border.thickness <= 0) {
+    if (!border.enabled || border.thickness <= 0) {
       continue;
     }
     let res = {
       width: border.thickness,
     };
-    if(borderOptions.dashePattern && borderOptions.dashePattern.length) {
+    if (borderOptions.dashePattern && borderOptions.dashePattern.length) {
       res.strokeDasharray = borderOptions.dashePattern;
     }
-    if({
+    if ({
       Butt: 'butt',
       Round: 'round',
       Projecting: 'square',
     }.hasOwnProperty(borderOptions.lineEnd)) {
       res.strokeLinecap = borderOptions.lineEnd;
     }
-    if(border.fillType === 'Color') {
+    if (border.fillType === 'Color') {
       res.color = border.color;
     }
-    else if(border.fillType === 'Gradient') {
+    else if (border.fillType === 'Gradient') {
       let { from, to, aspectRatio, gradientType, stops } = border.gradient;
-      if(gradientType === 'Linear') {
+      if (gradientType === 'Linear') {
         let s = `radialGradient(${from.x} ${from.y} ${to.x} ${to.y}`;
         stops.forEach(item => {
           s += `, ${item.position * 100}% ${item.color}`;
@@ -171,7 +165,7 @@ function getBorderStyle(borders, borderOptions) {
         s += ')';
         res.color = s;
       }
-      else if(gradientType === 'Radial') {
+      else if (gradientType === 'Radial') {
         let s = `radialGradient(${from.x} ${from.y} ${to.x} ${to.y} ${aspectRatio || 1}`;
         stops.forEach(item => {
           s += `, ${item.position * 100}% ${item.color}`;
@@ -183,11 +177,11 @@ function getBorderStyle(borders, borderOptions) {
     return res;
   }
 }
-function getImageFormat(exportFormats) {
+function getImageFormat (exportFormats) {
   let imageFormat = 'png';
-  if(exportFormats && exportFormats.length) {
+  if (exportFormats && exportFormats.length) {
     exportFormats.some(exportFormat => {
-      if(exportFormat && exportFormat.fileFormat) {
+      if (exportFormat && exportFormat.fileFormat) {
         imageFormat = exportFormat.fileFormat;
         return true;
       }
@@ -197,21 +191,69 @@ function getImageFormat(exportFormats) {
   return imageFormat;
 }
 
-function base64SrcEncodedFromNsData(nsdata, imageFormat) {
+function base64SrcEncodedFromNsData (nsdata, imageFormat) {
   return `data:image/${imageFormat};base64,${nsdata.base64EncodedStringWithOptions(0)}`;
 }
-  
-function appKitWeightToCSSWeight(appKitWeight) {
-  return [100,100,100,200,300,400,500,500,600,700,800,900,900,900,900,900][appKitWeight] || 500;
+
+function uploadImage (base64Data, needCompress = true, fileName = 'a.png', needFormat = true) {
+
+  const url = 'https://animconfig-office.alipay.net/api/ae2karas/upload';
+  return fetch(url, {
+    method: 'post',
+    headers: {
+      Accept: '*/*',
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: `imgData=${base64Data.replace(/\+/g, '_')}&fileName=${fileName}&needCompress=${needCompress}&needFormat=${needFormat}`,
+  })
+    .then(res => {
+      if (res.ok) {
+        return JSON.parse(res.text()._value);
+      } else {
+        return null;
+      }
+    })
+    .catch(e => {
+      console.error(e)
+    });
+}
+
+function saveImage (layer) {
+  const outputPath = '~/sketch-karas/images/';
+  const format = 'png';
+  let layerId;
+  if (layer.length > 0) {
+    layerId = layer[0].id;
+  } else {
+    layerId = layer.id;
+  }
+  const fileName = layerId
+    ? `${outputPath}${layerId}.${format}`
+    : `${outputPath}${+new Date()}.${format}`
+  const options = {
+    scales: 1,
+    formats: 'png',
+    trimmed: true, // 剪切图片透明无效区域
+    'use-id-for-name': true,
+    'group-contents-only': true,
+    'save-for-web': false,
+    output: outputPath
+  };
+
+  const a = sketch.export(layer, options);
+  return fileName;
+}
+function appKitWeightToCSSWeight (appKitWeight) {
+  return [100, 100, 100, 200, 300, 400, 500, 500, 600, 700, 800, 900, 900, 900, 900, 900][appKitWeight] || 500;
 }
 
 // P0, P1, P2 => M1, C1, C2, C3
-function getBezierpts(P0, P1, P2, R) {
-// function getBezierpts() {
-//   const P0 = [0,100];
-//   const P1 = [100, 100];
-//   const P2 = [100 ,0];
-//   const R = 50;
+function getBezierpts (P0, P1, P2, R) {
+  // function getBezierpts() {
+  //   const P0 = [0,100];
+  //   const P1 = [100, 100];
+  //   const P2 = [100 ,0];
+  //   const R = 50;
 
   let M1 = [];
   let C1 = [];
@@ -223,8 +265,8 @@ function getBezierpts(P0, P1, P2, R) {
   const Lp2p0 = Math.sqrt((P0[1] - P2[1]) * (P0[1] - P2[1]) + (P0[0] - P2[0]) * (P0[0] - P2[0]));
 
   const angle = Math.acos((Lp0p1 * Lp0p1 + Lp1p2 * Lp1p2 - Lp2p0 * Lp2p0) / (2 * Lp0p1 * Lp1p2));
-  
-  const Lp1m1 = R / Math.tan(angle/2);
+
+  const Lp1m1 = R / Math.tan(angle / 2);
 
   const Lp1c1 = Lp1m1 - 4 / 3 * R * Math.tan(Math.PI / 4 - angle / 4);
   const Lp1c2 = Lp1c1;
@@ -263,4 +305,6 @@ export default {
   base64SrcEncodedFromNsData,
   appKitWeightToCSSWeight,
   getBezierpts,
+  uploadImage,
+  saveImage,
 }
