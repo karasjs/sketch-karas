@@ -3,6 +3,7 @@ import { Image, Rectangle } from 'sketch/dom';
 
 import util from './util';
 import TYPE_ENUM from './type';
+import autoLayout from './autoLayout';
 
 const {
   isNil,
@@ -21,6 +22,7 @@ let root = {
   tagName: 'div',
   props: {
     style: {
+      position: 'absolute',
       left: 0,
       fix_left: 0,
       top: 0,
@@ -44,7 +46,7 @@ function parse (layers) {
   return new Promise((resolve, reject) => {
     Promise.all(ImageQueue.map(image => {
       const base64Data = image.props.src;
-      if (base64Data.length < 4000) {
+      if (base64Data.length < 10000) {
         base64ImageNumber++;
         return Promise.resolve();
       }
@@ -64,12 +66,126 @@ function parse (layers) {
         props.style.left = props.style.fixed_left;
         props.style.top = props.style.fixed_top;
       });
-      console.log(JSON.stringify(root));
+      // console.log(JSON.stringify(root));
+      const result = autoLayout(root);
+      // console.log(JSON.stringify(result), '===========');
+
+      const idList = [];
+      const x = {
+        tagName: 'div',
+        props: root.props,
+        children: [],
+      };
+
+      const childGroup = [];
+      const group = [];
+
+      result.forEach(p => {
+
+        const r = {
+          tagName: 'div',
+          props: {
+            style: {
+              ...p.style,
+              // position: 'absolute',
+              left: p.style.x,
+              top: p.style.y,
+              width: p.style.w,
+              height: p.style.h,
+              // border: '3px solid rgba(255, 0, 0, 1)'
+            }
+          },
+          children: p.children.map(q => {
+            const qr = {
+              tagName: 'div',
+              props: {
+                style: {
+                  ...q.style,
+                  // position: 'absolute',
+                  left: q.style.x,
+                  top: q.style.y,
+                  width: q.style.w,
+                  height: q.style.h,
+                }
+              },
+              children: q.childrenIds.map(id => {
+                const a = root.children.filter(({ id: rid }) => rid === id);
+                idList.push(id);
+                return a[0];
+              }),
+            }
+            childGroup.push({
+              tagName: 'div',
+              props: {
+                style: {
+                  ...q.style,
+                  position: 'absolute',
+                  left: q.style.x,
+                  top: q.style.y,
+                  width: q.style.w,
+                  height: q.style.h,
+                  border: '3px solid rgba(0, 255, 0, 1)'
+                }
+              }
+            });
+            return qr;
+          }),
+        };
+        // const group = 
+        x.children.push(r);
+        group.push({
+          tagName: 'div',
+          props: {
+            style: {
+              ...p.style,
+              position: 'absolute',
+              left: p.style.x,
+              top: p.style.y,
+              width: p.style.w,
+              height: p.style.h,
+              border: '3px solid rgba(255, 0, 0, 1)'
+            }
+          }
+        })
+
+      });
+
+
+      root.children.forEach((child, index) => {
+        child.props.style.zIndex = index;
+        if (idList.indexOf(child.id) === -1) {
+          x.children.unshift(child)
+        }
+      });
+
+      function getZIndex (a) {
+        if (a.props.style.zIndex != null) {
+          return a.props.style.zIndex;
+        } else if (!a.children || a.children.length === 0) {
+          return 0;
+        }
+        return getZIndex(a.children[0]);
+      }
+      const m = x.children.sort((a, b) => {
+        // console.log(getZIndex(a), a)
+        return getZIndex(a) - getZIndex(b);
+      });
+
+      x.children = m;
+      x.children = m.concat(group).concat(childGroup);
+
+      // console.log(JSON.stringify(x))
+      // root.children = [];
+
+      // console.log(JSON.stringify(result));
       // resolve(data);
 
-      console.log(layers[0])
+      // console.log(layers[0])
       // resolve([root]);
-      resolve([root]);
+
+
+      // resolve([root]);
+      resolve([x]);
     });
   });
 }
@@ -92,7 +208,6 @@ function parseLayer (layer, json, isChildren, lpPos) {
     fix_x: lpPos?.fix_x || 0,
     fix_y: lpPos?.fix_y || 0,
   };
-  console.log(lpPos, '--------------');
   parseNormal(data, json, layer, isChildren, pPos);
   if (json.type === TYPE_ENUM.SHAPE_PATH) {
     parseShapePath(data, json, layer, isChildren);

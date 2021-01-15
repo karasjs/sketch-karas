@@ -36,8 +36,11 @@
     "url": "git://github.com/karasjs/sketch-karas.git"
   },
   "dependencies": {
+    "array-flatten": "^3.0.0",
+    "auto-layout": "^0.0.0",
+    "combinate": "^1.1.2",
     "karas": "^0.46.1",
-    "sketch-polyfill-fetch": "^0.5.2"
+    "ml-kmeans": "^5.0.0"
   },
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "^7.12.1",

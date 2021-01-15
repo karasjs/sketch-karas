@@ -1,5 +1,5 @@
 {
-  "compatibleVersion": 57,
+  "compatibleVersion": 70,
   "bundleVersion": 1,
   "icon": "icon.png",
   "commands": [
@@ -23,6 +23,12 @@
       "shortcut": "ctrl shift d"
     },
     {
+      "name": "AutoLayout",
+      "identifier": "autoLayout",
+      "script": "autoLayoutIndex.js",
+      "shortcut": "ctrl shift l"
+    },
+    {
       "name": "Link",
       "identifier": "link",
       "script": "link.js"
@@ -35,6 +41,14 @@
   ],
   "menu": {
     "title": "sketch-karas",
-    "items": ["toolbar", "-", "convert", "convertToImage", "link", "about"]
+    "items": [
+      "toolbar",
+      "-",
+      "convert",
+      "convertToImage",
+      "autoLayout",
+      "link",
+      "about"
+    ]
   }
 }
