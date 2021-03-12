@@ -11,3 +11,8 @@ export default {
   SLICE: 'Slice',
   HOT_SPOT: 'HotSpot',
 };
+
+
+export const GRAVITY_TOP = 1;
+export const GRAVITY_CENTER = 2;
+export const GRAVITY_BOTTOM = 3;
