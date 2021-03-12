@@ -4,14 +4,15 @@ import about from './about';
 import pack from '../package.json';
 import { getThreadDictForKey, setThreadDictForKey, clearPanels } from './tools';
 export let TOOLBAR_IDENTIFIER = 'toolbar';
-
+const TOOLBAR_DEFAULT_WIDTH = 40; 
 
 export function onRunToolBar (context) {
   let pluginSketch = context.plugin.url().URLByAppendingPathComponent('Contents').URLByAppendingPathComponent('Resources');
   let document = context.document || context.actionContext.document || MSDocument.currentDocument()
 
   const stored = getThreadDictForKey(TOOLBAR_IDENTIFIER);
-  // clearPanels(document);
+
+  clearPanels(document, TOOLBAR_IDENTIFIER);
   if (stored) return;
 
   const makeToolbar = () => {
@@ -20,7 +21,7 @@ export function onRunToolBar (context) {
     toolbar.setIdentifier(TOOLBAR_IDENTIFIER);
     toolbar.setSpacing(0);
     toolbar.setFlipped(true);
-    toolbar.setBackgroundColor(NSColor.colorWithHex('#2E2F30'));
+    toolbar.setBackgroundColor(NSColor.colorWithHex('#FFF'));
     toolbar.orientation = 1;
     return toolbar;
   };
@@ -65,9 +66,10 @@ export function onRunToolBar (context) {
 
 
   function getImage (name, size) {
-    let imageURL = pluginSketch.URLByAppendingPathComponent(name + '.png');
-    let image = NSImage.alloc().initWithContentsOfURL(imageURL);
+    const imageURL = pluginSketch.URLByAppendingPathComponent(name + '.png');
+    const image = NSImage.alloc().initWithContentsOfURL(imageURL);
     image.setSize(size);
+    image.setScalesWhenResized(true);
     return image;
   }
 
@@ -90,6 +92,14 @@ export function onRunToolBar (context) {
     return view;
   }
 
+  const createImageView = (rect, icon, size ) => {
+    const imageView = NSImageView.alloc().initWithFrame(rect);
+    const image = getImage(icon, size);
+    imageView.setImage(image);
+    imageView.setAutoresizingMask(5);
+    return imageView;
+  };
+
   function addText (rect, text) {
     let view = NSTextView.alloc().initWithFrame(rect);
     view.editable = false;
@@ -99,29 +109,20 @@ export function onRunToolBar (context) {
     return view;
   }
 
-  // let toolbar = NSPanel.alloc().init();
   const toolbar = makeToolbar();
   
   coscript.setShouldKeepAround(true);
-  // // toolbar.setStyleMask(NSTitledWindowMask + NSClosableWindowMask);
-  // toolbar.setStyleMask(NSTitledWindowMask + NSFullSizeContentViewWindowMask);
-  // toolbar.setBackgroundColor(NSColor.colorWithRed_green_blue_alpha(1, 1, 1, 1));
-  // toolbar.setTitleVisibility(NSWindowTitleHidden);
-  // toolbar.setTitlebarAppearsTransparent(true);
-  // toolbar.setFrame_display(NSMakeRect(600, 500, 162, 78), false);
-  // toolbar.becomeKeyWindow();
-  // toolbar.setLevel(NSFloatingWindowLevel);
 
-  // let contentView = toolbar.contentView();
 
-  // let iconView = addImage(NSMakeRect(10, 57, 16, 16), 'icon');
-  // contentView.addSubview(iconView);
+
+  const iconView = createImageView(NSMakeRect(0, 20, 30, 30), 'icon', NSMakeSize(30, 30));
+  toolbar.addView_inGravity(iconView, 1);
 
   // let textView = addText(NSMakeRect(28, 55, 100, 16), pack.version);
   // contentView.addSubview(textView);
 
-  // let lineView = addImage(NSMakeRect(8, 52, 162, 1), 'line');
-  // contentView.addSubview(lineView);
+  // const lineView = createImageView(NSMakeRect(8, 52, 162, 1), 'line',NSMakeSize(30, 30));
+  // toolbar.addView_inGravity(lineView, 1);
 
   // let closeBtn = addButton(NSMakeRect(10, 18, 16, 16), 'close', function() {
   //   coscript.setShouldKeepAround(false);
@@ -130,17 +131,17 @@ export function onRunToolBar (context) {
   // contentView.addSubview(closeBtn);
 
 
-  let convertBtn = addButton(NSMakeRect(36, 10, 32, 32), 'convert', function () {
+  let convertBtn = addButton(NSMakeRect(0, 0, TOOLBAR_DEFAULT_WIDTH, TOOLBAR_DEFAULT_WIDTH), 'convert', function () {
     convert();
   });
   toolbar.addView_inGravity(convertBtn, 1);
 
-  let linkBtn = addButton(NSMakeRect(78, 10, 32, 32), 'link', function () {
+  let linkBtn = addButton(NSMakeRect(0, 0, TOOLBAR_DEFAULT_WIDTH, TOOLBAR_DEFAULT_WIDTH), 'link', function () {
     link();
   });
   toolbar.addView_inGravity(linkBtn, 1);
 
-  let aboutBtn = addButton(NSMakeRect(120, 10, 32, 32), 'about', function () {
+  let aboutBtn = addButton(NSMakeRect(0, 0, TOOLBAR_DEFAULT_WIDTH, TOOLBAR_DEFAULT_WIDTH), 'about', function () {
     about();
   });
   toolbar.addView_inGravity(aboutBtn, 1);

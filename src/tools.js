@@ -24,14 +24,10 @@ export const removeThreadDictForKey = (key, docId) => {
     threadDictionary.removeObjectForKey(key);
 };
 
-export function clearPanels(document) {
+export function clearPanels(document,key) {
     const threadDictionary = NSThread.mainThread().threadDictionary();
-    for (const key in threadDictionary) {
-        const view = threadDictionary[key];
-        if (!view) return;
-        console.log('11111111');
-        console.log(view);
-        (document.splitViewController()).removeSplitViewItem(view);
-        threadDictionary.removeObjectForKey(key);
-    }
+    const view = threadDictionary[key];
+    if (!view) return;
+    (document.splitViewController()).removeSplitViewItem(view);
+    threadDictionary.removeObjectForKey(key);
 }
