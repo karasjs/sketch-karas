@@ -1,6 +1,6 @@
 import { Document } from 'sketch/dom';
 import UI from 'sketch/ui';
-import parse from './parse';
+import parse from './autoLayoutParse';
 import message from './message';
 
 export default function () {

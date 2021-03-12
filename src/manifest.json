@@ -1,5 +1,5 @@
 {
-  "compatibleVersion": 57,
+  "compatibleVersion": 70,
   "bundleVersion": 1,
   "icon": "icon.png",
   "commands": [
@@ -7,12 +7,26 @@
       "name": "Show Toolbar",
       "identifier": "toolbar",
       "script": "toolbar.js",
-      "handler": "onRunToolBar"
+      "handler": "onRunToolBar",
+      "shortcut": "ctrl shift t"
     },
     {
       "name": "Convert",
       "identifier": "convert",
-      "script": "convert.js"
+      "script": "convert.js",
+      "shortcut": "ctrl shift c"
+    },
+    {
+      "name": "ConvertToImage",
+      "identifier": "convertToImage",
+      "script": "convertToImage.js",
+      "shortcut": "ctrl shift d"
+    },
+    {
+      "name": "AutoLayout",
+      "identifier": "autoLayout",
+      "script": "autoLayoutIndex.js",
+      "shortcut": "ctrl shift l"
     },
     {
       "name": "Link",
@@ -31,6 +45,8 @@
       "toolbar",
       "-",
       "convert",
+      "convertToImage",
+      "autoLayout",
       "link",
       "about"
     ]

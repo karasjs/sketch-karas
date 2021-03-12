@@ -6,7 +6,7 @@ import { getThreadDictForKey, setThreadDictForKey, clearPanels } from './tools';
 export let TOOLBAR_IDENTIFIER = 'toolbar';
 
 
-export function onRunToolBar(context) {
+export function onRunToolBar (context) {
   let pluginSketch = context.plugin.url().URLByAppendingPathComponent('Contents').URLByAppendingPathComponent('Resources');
   let document = context.document || context.actionContext.document || MSDocument.currentDocument()
 
@@ -64,14 +64,14 @@ export function onRunToolBar(context) {
   };
 
 
-  function getImage(name, size) {
+  function getImage (name, size) {
     let imageURL = pluginSketch.URLByAppendingPathComponent(name + '.png');
     let image = NSImage.alloc().initWithContentsOfURL(imageURL);
     image.setSize(size);
     return image;
   }
 
-  function addButton(rect, name, callAction) {
+  function addButton (rect, name, callAction) {
     let button = NSButton.alloc().initWithFrame(rect);
     let image = getImage(name, rect.size);
     button.setImage(image);
@@ -83,14 +83,14 @@ export function onRunToolBar(context) {
     return button;
   }
 
-  function addImage(rect, name) {
+  function addImage (rect, name) {
     let view = NSImageView.alloc().initWithFrame(rect);
     let image = getImage(name, rect.size);
     view.setImage(image);
     return view;
   }
 
-  function addText(rect, text) {
+  function addText (rect, text) {
     let view = NSTextView.alloc().initWithFrame(rect);
     view.editable = false;
     view.selectable = false;
@@ -129,17 +129,18 @@ export function onRunToolBar(context) {
   // });
   // contentView.addSubview(closeBtn);
 
-  let convertBtn = addButton(NSMakeRect(36, 10, 32, 32), 'convert', function() {
+
+  let convertBtn = addButton(NSMakeRect(36, 10, 32, 32), 'convert', function () {
     convert();
   });
   toolbar.addView_inGravity(convertBtn, 1);
 
-  let linkBtn = addButton(NSMakeRect(78, 10, 32, 32), 'link', function() {
+  let linkBtn = addButton(NSMakeRect(78, 10, 32, 32), 'link', function () {
     link();
   });
   toolbar.addView_inGravity(linkBtn, 1);
 
-  let aboutBtn = addButton(NSMakeRect(120, 10, 32, 32), 'about', function() {
+  let aboutBtn = addButton(NSMakeRect(120, 10, 32, 32), 'about', function () {
     about();
   });
   toolbar.addView_inGravity(aboutBtn, 1);
